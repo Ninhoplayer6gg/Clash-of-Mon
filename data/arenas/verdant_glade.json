@@ -1,0 +1,44 @@
+{
+	"id": "verdant_glade",
+	"name": "Clareira Verdejante",
+	"description": "Uma clareira aberta no meio da floresta, com pedras, tocos, árvores e um pequeno lago central.",
+	"size": [1120, 760],
+	"seed": 7,
+	"mirror": "x",
+	"palette": {
+		"grass": "#4f9a3e", "grass_dark": "#3f8232", "grass_light": "#6bb84f",
+		"dirt": "#b98a52", "dirt_dark": "#9a6f3e", "border": "#1d4522",
+		"rock": "#8f8f99", "wall": "#9a917f", "water": "#3d7fc4",
+		"trunk": "#6b4a2b", "leaves": "#2f7d32"
+	},
+	"spawns": [[300, 380], [820, 380]],
+	"paths": [
+		{"line": [[110, 380], [1010, 380]], "width": 36},
+		{"circle": [560, 380, 74]},
+		{"line": [[560, 0], [560, 760]], "width": 26}
+	],
+	"decor": {"flowers": 0.05, "tufts": 0.09},
+	"obstacles": [
+		{"kind": "tree", "pos": [70, 80]},
+		{"kind": "tree", "pos": [128, 58]},
+		{"kind": "tree", "pos": [52, 150]},
+		{"kind": "tree", "pos": [66, 690]},
+		{"kind": "tree", "pos": [135, 720]},
+		{"kind": "tree", "pos": [290, 64]},
+		{"kind": "tree", "pos": [300, 712]},
+		{"kind": "rock", "pos": [300, 230], "radius": 16},
+		{"kind": "rock", "pos": [268, 548], "radius": 13},
+		{"kind": "rock", "pos": [430, 388], "radius": 15},
+		{"kind": "wall", "rect": [372, 150, 96, 16]},
+		{"kind": "wall", "rect": [372, 600, 96, 16]},
+		{"kind": "stump", "pos": [236, 380], "breakable": true, "hp": 1400},
+		{"kind": "stump", "pos": [180, 250]},
+		{"kind": "rock", "pos": [190, 520], "radius": 10},
+		{"kind": "pond", "pos": [560, 380], "radius": 36, "no_mirror": true},
+		{"kind": "tree", "pos": [560, 96], "no_mirror": true},
+		{"kind": "tree", "pos": [560, 676], "no_mirror": true},
+		{"kind": "rock", "pos": [500, 250], "radius": 11},
+		{"kind": "rock", "pos": [505, 520], "radius": 12}
+	],
+	"bushes": [[110, 300], [120, 460], [350, 300], [350, 470], [1010, 300], [1000, 460], [770, 300], [770, 470], [470, 690], [650, 70]]
+}

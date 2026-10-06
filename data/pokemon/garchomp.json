@@ -1,0 +1,108 @@
+{
+	"id": "garchomp",
+	"name": "Garchomp",
+	"dex": 445,
+	"role": "Brigador Corpo a Corpo",
+	"difficulty": 1,
+	"description": "Pressão máxima de perto. Dragon Rush investe e derruba, Bulldoze desacelera em área e Dig atravessa o mapa por baixo da terra. Em Outrage, Garchomp fica mais rápido, forte e resistente.",
+	"ai": {"range": 28, "style": "brawler", "aggression": 0.85, "retreat_hp": 0.12},
+	"default_form": "base",
+	"forms": {
+		"base": {
+			"name": "Garchomp",
+			"sprite": "res://assets/pmd/sprite/0445",
+			"portrait": "res://assets/pmd/portrait/0445/Normal.png",
+			"types": ["dragon", "ground"],
+			"stats": {
+				"hp": 3600, "attack": 124, "defense": 98, "sp_attack": 85, "sp_defense": 82,
+				"move_speed": 136, "mass": 1.3, "radius": 11, "energy": 100, "energy_regen": 20
+			},
+			"passive": {
+				"id": "rough_skin",
+				"name": "Rough Skin",
+				"description": "Quem acerta Garchomp com golpes de contato recebe de volta 20% do dano causado.",
+				"params": {"reflect": 0.2}
+			},
+			"abilities": {
+				"basic": {
+					"id": "dragon_claw", "name": "Dragon Claw", "icon": "DC",
+					"description": "Duas garradas largas. A segunda empurra.",
+					"type": "dragon", "category": "physical",
+					"cooldown": 0.3, "energy": 0, "range": 44, "aim": "direction",
+					"anim": "swing", "cast_time": 0.3, "move_mult": 0.3,
+					"combo_window": 0.75,
+					"ai": {"max": 40},
+					"combo": [
+						{"anim": "swing", "cast_time": 0.28, "move_mult": 0.35, "sfx": "swing",
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 34, "angle": 120, "offset": 2, "power": 160, "knockback": 70, "contact": true,
+						              "vfx": {"style": "slash", "color": "#b48cff"}}]},
+						{"anim": "attack", "cast_time": 0.36, "move_mult": 0.2, "sfx": "swing",
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 37, "angle": 140, "offset": 2, "power": 205, "knockback": 180, "hitstun": 0.14, "contact": true,
+						              "vfx": {"style": "slash", "color": "#8a5cff"}}]}
+					],
+					"variants": {
+						"outrage": {"anim": "attack", "cast_time": 0.3, "move_mult": 0.5, "sfx": "swing",
+						            "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 44, "angle": 170, "offset": 2, "power": 210, "knockback": 150, "hitstun": 0.12, "contact": true,
+						                         "vfx": {"style": "slash", "color": "#ff5c5c"}}]}
+					}
+				},
+				"skill1": {
+					"id": "dragon_rush", "name": "Dragon Rush", "icon": "DR",
+					"description": "Investida brutal que para no primeiro alvo atingido e o derruba para trás.",
+					"type": "dragon", "category": "physical",
+					"cooldown": 6.0, "energy": 22, "range": 145, "aim": "direction",
+					"anim": "attack", "cast_time": 0.42, "move_mult": 0.0, "super_armor": true,
+					"ai": {"min": 45, "max": 140, "use": "engage"},
+					"actions": [
+						{"at": 0.04, "do": "dash", "distance": 145, "duration": 0.3,
+						 "hit": {"shape": "circle", "radius": 16, "offset": 4, "power": 330, "knockback": 300, "hitstun": 0.26, "kb_dir": "forward", "contact": true,
+						         "stop_owner_on_hit": true, "sfx": "hit_heavy", "vfx": {"style": "burst", "color": "#8a5cff"}}}
+					]
+				},
+				"skill2": {
+					"id": "bulldoze", "name": "Bulldoze", "icon": "BD",
+					"description": "Pisoteia o chão: dano em área ao redor e Lentidão por 1,5s.",
+					"type": "ground", "category": "physical",
+					"cooldown": 7.0, "energy": 24, "range": 60, "aim": "self",
+					"anim": "rearup", "cast_time": 0.48, "move_mult": 0.0, "sfx": "blast",
+					"ai": {"max": 62, "use": "engage"},
+					"actions": [
+						{"at": "hit", "do": "aoe", "where": "self", "delay": 0.1, "radius": 62, "duration": 0.12, "power": 270, "knockback": 150, "kb_dir": "away",
+						 "status": {"id": "slow", "chance": 1.0},
+						 "vfx": {"style": "ring", "color": "#e2bf65", "fade": 0.25}},
+						{"at": "hit", "do": "shake", "amount": 3.0, "time": 0.15}
+					]
+				},
+				"skill3": {
+					"id": "dig", "name": "Dig", "icon": "DG",
+					"description": "Cava e viaja por baixo da terra (intocável) até o ponto escolhido, emergindo com um impacto que arremessa.",
+					"type": "ground", "category": "physical",
+					"cooldown": 7.5, "energy": 22, "range": 165, "aim": "point",
+					"anim": "hop", "cast_time": 0.65, "move_mult": 0.0,
+					"tags": ["mobility"],
+					"ai": {"max": 165, "use": "escape"},
+					"actions": [
+						{"at": 0.0, "do": "burrow", "distance": 165, "duration": 0.6,
+						 "emerge": {"radius": 36, "power": 250, "knockback": 230, "kb_dir": "away", "hitstun": 0.2, "duration": 0.1, "sfx": "hit_heavy",
+						            "vfx": {"style": "burst", "color": "#c9a46a"}}}
+					]
+				},
+				"ult": {
+					"id": "outrage", "name": "Outrage", "icon": "OU",
+					"description": "ULTIMATE: rugido que empurra quem estiver perto; por 5s Garchomp fica 20% mais rápido, 15% mais forte, recebe 15% menos dano, ataca mais rápido, rouba vida e suas garras ficam enormes.",
+					"type": "dragon", "category": "physical",
+					"cooldown": 1.0, "energy": 0, "range": 50, "aim": "self",
+					"anim": "rearup", "cast_time": 0.45, "move_mult": 0.0, "super_armor": true, "sfx": "blast",
+					"ai": {"max": 120, "use": "finisher"},
+					"actions": [
+						{"at": "hit", "do": "aoe", "where": "self", "radius": 50, "duration": 0.1, "power": 180, "knockback": 260, "kb_dir": "away",
+						 "vfx": {"style": "ring", "color": "#ff5c5c"}},
+						{"at": "hit", "do": "buff", "id": "outrage", "duration": 5.0, "color": "#ff5c5c",
+						 "mods": {"speed_mult": 1.2, "damage_mult": 1.15, "damage_taken_mult": 0.85, "attack_speed_mult": 1.25, "lifesteal": 0.12, "variant": "outrage"}},
+						{"at": "hit", "do": "shake", "amount": 4.0, "time": 0.25}
+					]
+				}
+			}
+		}
+	}
+}

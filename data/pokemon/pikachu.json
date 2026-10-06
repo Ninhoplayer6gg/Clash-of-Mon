@@ -1,0 +1,102 @@
+{
+	"id": "pikachu",
+	"name": "Pikachu",
+	"dex": 25,
+	"role": "Velocista / Atirador",
+	"difficulty": 2,
+	"description": "Frágil, mas o mais rápido do elenco. Cutuca de longe com Thunder Shock, paralisa com Thunderbolt e foge com Quick Attack. Electro Ball fica mais forte quanto mais rápido Pikachu for em relação ao alvo.",
+	"ai": {"range": 150, "style": "kite", "aggression": 0.55, "retreat_hp": 0.3},
+	"default_form": "base",
+	"forms": {
+		"base": {
+			"name": "Pikachu",
+			"sprite": "res://assets/pmd/sprite/0025",
+			"portrait": "res://assets/pmd/portrait/0025/Normal.png",
+			"types": ["electric"],
+			"stats": {
+				"hp": 2500, "attack": 85, "defense": 72, "sp_attack": 112, "sp_defense": 86,
+				"move_speed": 136, "mass": 0.75, "radius": 8, "energy": 100, "energy_regen": 24
+			},
+			"anim_map": {"bolt": ["Shock", "Shoot"]},
+			"dash": {"distance": 84, "energy_cost": 28},
+			"passive": {
+				"id": "static",
+				"name": "Static",
+				"description": "Golpes de contato em Pikachu têm 30% de chance de paralisar o atacante. A cada 4 acertos de Thunder Shock, o próximo sai carregado e paralisa.",
+				"params": {"contact_chance": 0.3, "internal_cd": 3.0, "charge_hits": 4}
+			},
+			"abilities": {
+				"basic": {
+					"id": "thunder_shock", "name": "Thunder Shock", "icon": "TS",
+					"description": "Disparo elétrico rápido de curto alcance. Pode atirar andando.",
+					"type": "electric", "category": "special",
+					"cooldown": 0.38, "energy": 9, "range": 175, "aim": "direction",
+					"anim": "shoot", "cast_time": 0.24, "move_mult": 0.55, "sfx": "zap",
+					"ai": {"max": 175},
+					"actions": [
+						{"at": "hit", "do": "projectile", "speed": 430, "range": 175, "radius": 5, "power": 100, "knockback": 40,
+						 "status": {"id": "paralysis", "chance": 0.04},
+						 "vfx": {"style": "bolt", "color": "#fffbd0", "color2": "#ffd23f", "size": 5}}
+					]
+				},
+				"skill1": {
+					"id": "electro_ball", "name": "Electro Ball", "icon": "EB",
+					"description": "Esfera elétrica que acelera. Causa até 35% a mais de dano conforme Pikachu for mais rápido que o alvo e explode no impacto.",
+					"type": "electric", "category": "special",
+					"cooldown": 4.5, "energy": 18, "range": 270, "aim": "direction",
+					"anim": "shoot", "cast_time": 0.38, "move_mult": 0.2, "sfx": "zap_big",
+					"ai": {"max": 260, "use": "poke"},
+					"actions": [
+						{"at": "hit", "do": "projectile", "speed": 230, "accel": 260, "max_speed": 520, "range": 270, "radius": 9,
+						 "power": 310, "knockback": 120, "speed_scaling": [0.9, 1.35],
+						 "status": {"id": "paralysis", "chance": 0.2},
+						 "explode": {"radius": 26, "power": 110, "knockback": 120, "duration": 0.1, "vfx": {"style": "burst", "color": "#ffe14a"}},
+						 "vfx": {"style": "orb", "color": "#ffffff", "color2": "#ffd23f", "size": 9}}
+					]
+				},
+				"skill2": {
+					"id": "thunderbolt", "name": "Thunderbolt", "icon": "TB",
+					"description": "Após um breve aviso, um raio atravessa a linha mirada e paralisa quem atingir.",
+					"type": "electric", "category": "special",
+					"cooldown": 7.0, "energy": 25, "range": 230, "aim": "direction",
+					"anim": "bolt", "cast_time": 0.5, "move_mult": 0.0, "sfx": "charge",
+					"ai": {"max": 220, "use": "poke"},
+					"actions": [
+						{"at": 0.0, "do": "beam", "length": 230, "width": 7, "delay": 0.24, "duration": 0.14,
+						 "power": 380, "knockback": 90, "hitstun": 0.18, "sfx": "thunder",
+						 "status": {"id": "paralysis", "chance": 0.55},
+						 "vfx": {"style": "beam", "color": "#ffe14a"}}
+					]
+				},
+				"skill3": {
+					"id": "quick_attack", "name": "Quick Attack", "icon": "QA",
+					"description": "Investida veloz e invulnerável no início. Atravessa inimigos causando dano.",
+					"type": "normal", "category": "physical",
+					"cooldown": 3.2, "energy": 14, "range": 125, "aim": "direction",
+					"anim": "quick", "cast_time": 0.22, "move_mult": 0.0,
+					"tags": ["mobility"],
+					"ai": {"max": 140, "use": "escape"},
+					"actions": [
+						{"at": 0.0, "do": "dash", "distance": 125, "duration": 0.16, "invulnerable": 0.13,
+						 "hit": {"shape": "circle", "radius": 12, "power": 150, "knockback": 130, "hitstun": 0.12, "contact": true,
+						         "vfx": {"style": "none", "color": "#ffffff"}}}
+					]
+				},
+				"ult": {
+					"id": "thunder", "name": "Thunder", "icon": "TH",
+					"description": "ULTIMATE: invoca três raios na área escolhida. Cada raio causa dano alto e paralisa.",
+					"type": "electric", "category": "special",
+					"cooldown": 1.0, "energy": 0, "range": 240, "aim": "point",
+					"anim": "charge", "cast_time": 0.55, "move_mult": 0.0, "super_armor": true, "sfx": "charge",
+					"ai": {"max": 230, "use": "finisher"},
+					"actions": [
+						{"at": 0.1, "do": "aoe", "where": "target", "count": 3, "stagger": 0.2, "scatter": 34,
+						 "delay": 0.45, "radius": 30, "duration": 0.12, "power": 520, "knockback": 150, "kb_dir": "away",
+						 "status": {"id": "paralysis", "chance": 1.0}, "sfx": "thunder",
+						 "vfx": {"style": "bolt", "color": "#ffe14a", "fade": 0.25}}
+					]
+				}
+			}
+		}
+	}
+}

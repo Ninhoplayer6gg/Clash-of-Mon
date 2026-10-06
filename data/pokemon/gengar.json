@@ -1,0 +1,98 @@
+{
+	"id": "gengar",
+	"name": "Gengar",
+	"dex": 94,
+	"role": "Assassino / Controle",
+	"difficulty": 3,
+	"description": "Envenena, adormece e some. Hypnosis faz o alvo dormir (acorda ao levar dano), abrindo espaço para combos; Shadow Force desaparece e reaparece explodindo. Cursed Body pune quem usa habilidades contra Gengar.",
+	"ai": {"range": 130, "style": "kite", "aggression": 0.6, "retreat_hp": 0.28},
+	"default_form": "base",
+	"forms": {
+		"base": {
+			"name": "Gengar",
+			"sprite": "res://assets/pmd/sprite/0094",
+			"portrait": "res://assets/pmd/portrait/0094/Normal.png",
+			"types": ["ghost", "poison"],
+			"stats": {
+				"hp": 3000, "attack": 90, "defense": 80, "sp_attack": 130, "sp_defense": 88,
+				"move_speed": 132, "mass": 0.9, "radius": 9, "energy": 100, "energy_regen": 25
+			},
+			"anim_map": {"lick": ["Lick", "Shoot"], "spin": ["Twirl", "Rotate"]},
+			"passive": {
+				"id": "cursed_body",
+				"name": "Cursed Body",
+				"description": "Quando uma habilidade atinge Gengar, há 40% de chance de amaldiçoar o atacante: +2,5s de recarga nessa habilidade (a cada 5s no máximo). Tipos Venenoso são imunes a Veneno.",
+				"params": {"chance": 0.4, "penalty": 2.5, "internal_cd": 5.0}
+			},
+			"abilities": {
+				"basic": {
+					"id": "sludge", "name": "Sludge", "icon": "SG",
+					"description": "Bolha tóxica de médio alcance com chance de envenenar.",
+					"type": "poison", "category": "special",
+					"cooldown": 0.42, "energy": 9, "range": 180, "aim": "direction",
+					"anim": "shoot", "anim_speed": 1.8, "cast_time": 0.3, "move_mult": 0.5, "sfx": "shadow",
+					"ai": {"max": 170},
+					"actions": [
+						{"at": "hit", "do": "projectile", "speed": 350, "range": 180, "radius": 6, "power": 118, "knockback": 40,
+						 "status": {"id": "poison", "chance": 0.3},
+						 "vfx": {"style": "orb", "color": "#e3b5ff", "color2": "#9b3fc7", "size": 6}}
+					]
+				},
+				"skill1": {
+					"id": "shadow_ball", "name": "Shadow Ball", "icon": "SB",
+					"description": "Esfera sombria que acelera e deixa o alvo Vulnerável (+12% de dano recebido por 3s).",
+					"type": "ghost", "category": "special",
+					"cooldown": 4.5, "energy": 20, "range": 260, "aim": "direction",
+					"anim": "shoot", "anim_speed": 1.4, "cast_time": 0.42, "move_mult": 0.15, "sfx": "shadow",
+					"ai": {"max": 250, "use": "poke"},
+					"actions": [
+						{"at": "hit", "do": "projectile", "speed": 240, "accel": 200, "max_speed": 480, "range": 260, "radius": 10,
+						 "power": 385, "knockback": 120, "hitstun": 0.15,
+						 "status": {"id": "vulnerable", "chance": 1.0},
+						 "vfx": {"style": "orb", "color": "#b78cff", "color2": "#2b1645", "size": 10}}
+					]
+				},
+				"skill2": {
+					"id": "hypnosis", "name": "Hypnosis", "icon": "HY",
+					"description": "Onda lenta que faz o alvo dormir por 1,3s. Qualquer dano acorda o alvo (e ele fica imune a sono por 6s).",
+					"type": "psychic", "category": "status",
+					"cooldown": 9.0, "energy": 25, "range": 210, "aim": "direction",
+					"anim": "charge", "cast_time": 0.4, "move_mult": 0.0, "sfx": "charge",
+					"ai": {"max": 200, "use": "poke"},
+					"actions": [
+						{"at": "hit", "do": "projectile", "speed": 175, "range": 210, "radius": 12, "power": 30,
+						 "status": {"id": "sleep", "chance": 1.0},
+						 "vfx": {"style": "wave", "color": "#ff9de2", "color2": "#ff9de2", "size": 12}}
+					]
+				},
+				"skill3": {
+					"id": "phantom_step", "name": "Phantom Step", "icon": "PS",
+					"description": "Teleporte curto para o ponto escolhido, atravessando paredes.",
+					"type": "ghost", "category": "status",
+					"cooldown": 5.0, "energy": 18, "range": 125, "aim": "point",
+					"anim": "spin", "cast_time": 0.16, "move_mult": 0.0, "sfx": "shadow",
+					"tags": ["mobility"],
+					"ai": {"max": 125, "use": "escape"},
+					"actions": [
+						{"at": 0.02, "do": "teleport", "distance": 125, "invulnerable": 0.15, "color": "#6a3fa0"}
+					]
+				},
+				"ult": {
+					"id": "shadow_force", "name": "Shadow Force", "icon": "SF",
+					"description": "ULTIMATE: Gengar desaparece por 1s (pode se mover mais rápido, invisível e intocável) e reaparece com uma explosão sombria. Um aviso no chão acompanha Gengar no final.",
+					"type": "ghost", "category": "physical",
+					"cooldown": 1.0, "energy": 0, "range": 60, "aim": "self",
+					"anim": "strike", "anim_speed": 0.6, "cast_time": 1.1, "move_mult": 1.3, "sfx": "shadow",
+					"ai": {"max": 150, "use": "finisher"},
+					"actions": [
+						{"at": 0.0, "do": "vanish", "duration": 1.0, "color": "#5b3a8a"},
+						{"at": 0.62, "do": "aoe", "where": "self", "follow": true, "delay": 0.38, "radius": 48, "duration": 0.12,
+						 "power": 760, "knockback": 260, "kb_dir": "away", "hitstun": 0.28, "sfx": "blast",
+						 "status": {"id": "vulnerable", "chance": 1.0},
+						 "vfx": {"style": "burst", "color": "#8a4fd6", "fade": 0.3}}
+					]
+				}
+			}
+		}
+	}
+}

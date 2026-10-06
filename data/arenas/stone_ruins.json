@@ -1,0 +1,36 @@
+{
+	"id": "stone_ruins",
+	"name": "Ruínas de Pedra",
+	"description": "Ruínas antigas com corredores de muros baixos. Favorece emboscadas e lutas de curta distância.",
+	"size": [1040, 720],
+	"seed": 21,
+	"mirror": "x",
+	"palette": {
+		"grass": "#6f8f4a", "grass_dark": "#5c7a3c", "grass_light": "#8aa85c",
+		"dirt": "#a89a80", "dirt_dark": "#8c7f68", "border": "#2c3324",
+		"rock": "#9c958a", "wall": "#b0a58e", "water": "#4a86b8",
+		"trunk": "#5e4630", "leaves": "#4e7a35"
+	},
+	"spawns": [[280, 360], [760, 360]],
+	"paths": [
+		{"rect": [80, 330, 880, 60]},
+		{"rect": [460, 80, 120, 560]}
+	],
+	"decor": {"flowers": 0.02, "tufts": 0.12},
+	"obstacles": [
+		{"kind": "wall", "rect": [240, 200, 16, 112]},
+		{"kind": "wall", "rect": [240, 408, 16, 112]},
+		{"kind": "wall", "rect": [330, 120, 112, 16]},
+		{"kind": "wall", "rect": [330, 590, 112, 16]},
+		{"kind": "rock", "pos": [380, 300], "radius": 13},
+		{"kind": "rock", "pos": [380, 430], "radius": 13},
+		{"kind": "tree", "pos": [80, 90]},
+		{"kind": "tree", "pos": [90, 640]},
+		{"kind": "stump", "pos": [150, 220], "breakable": true, "hp": 1200},
+		{"kind": "stump", "pos": [150, 500], "breakable": true, "hp": 1200},
+		{"kind": "wall", "rect": [488, 220, 64, 16], "no_mirror": true},
+		{"kind": "wall", "rect": [488, 500, 64, 16], "no_mirror": true},
+		{"kind": "rock", "pos": [520, 360], "radius": 18, "no_mirror": true}
+	],
+	"bushes": [[180, 130], [180, 600], [860, 130], [860, 600], [300, 360], [740, 360]]
+}
