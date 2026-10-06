@@ -22,11 +22,15 @@ var damage_numbers := true
 var sfx_volume := 0.8
 ## "auto" shows touch controls on touch devices only; "on"/"off" force it.
 var touch_controls := "auto"
+## v0.2 polish: hit-stop / KO slow motion, and whether "Como jogar" was seen.
+var hit_stop := true
+var tutorial_seen := false
 
 const _KEYS := [
 	"target_fps", "quality", "show_fps", "debug_overlay", "show_hitboxes",
 	"controls_scale", "controls_opacity", "aim_assist", "screen_shake",
 	"vibration", "damage_numbers", "sfx_volume", "touch_controls",
+	"hit_stop", "tutorial_seen",
 ]
 
 

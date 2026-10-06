@@ -7,6 +7,8 @@ var _preview_holder: Node2D
 var _animator: PMDAnimator
 var _anim_box: HFlowContainer
 var _info: RichTextLabel
+var _abilities_box: VBoxContainer  # v0.2: one row (icon + text) per ability
+var _info_tail: RichTextLabel
 var _form_box: HBoxContainer
 var _anim_label: Label
 var _current_id := ""
@@ -95,13 +97,17 @@ func _ready() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	info_panel.add_child(scroll)
-	_info = RichTextLabel.new()
-	_info.bbcode_enabled = true
-	_info.fit_content = true
-	_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_info.add_theme_font_size_override("normal_font_size", 16)
-	_info.add_theme_font_size_override("bold_font_size", 17)
-	scroll.add_child(_info)
+	var info_box := VBoxContainer.new()
+	info_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_box.add_theme_constant_override("separation", 8)
+	scroll.add_child(info_box)
+	_info = _rich_label()
+	info_box.add_child(_info)
+	_abilities_box = VBoxContainer.new()
+	_abilities_box.add_theme_constant_override("separation", 8)
+	info_box.add_child(_abilities_box)
+	_info_tail = _rich_label()
+	info_box.add_child(_info_tail)
 	if not GameData.roster.is_empty():
 		_select(GameData.roster[0], "")
 
@@ -135,6 +141,8 @@ func _select(id: String, form_id: String) -> void:
 		_anim_box.add_child(ab)
 	_play_raw("Idle")
 	_info.text = _describe(def, form, sprite_set)
+	_fill_abilities(form)
+	_info_tail.text = _describe_assets(form, sprite_set)
 
 
 func _play_raw(n: String) -> void:
@@ -185,20 +193,67 @@ func _describe(def: PokemonDef, form: FormDef, sprite_set: PMDSpriteSet) -> Stri
 	s.append(table)
 	s.append("")
 	s.append("[b]Passiva — %s[/b]\n%s" % [form.passive.get("name", ""), form.passive.get("description", "")])
-	s.append("")
+	return "\n".join(s)
+
+
+## v0.2 polish: one row per ability with its procedural icon.
+func _fill_abilities(form: FormDef) -> void:
+	for c in _abilities_box.get_children():
+		c.queue_free()
 	var labels := {"basic": "Ataque básico", "skill1": "Skill 1", "skill2": "Skill 2", "skill3": "Skill 3", "ult": "Ultimate"}
 	for slot in FormDef.SLOTS:
 		var ab := form.ability(slot)
 		if ab == null:
 			continue
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		_abilities_box.add_child(row)
+		var icon := _AbilityIcon.new()
+		icon.shape = SkillIcons.shape_for(ab, form)
+		icon.tint = SkillIcons.icon_color(ab.move_type)
+		icon.ring = GameData.type_color(ab.move_type)
+		icon.custom_minimum_size = Vector2(44, 44)
+		icon.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		row.add_child(icon)
+		var text := _rich_label()
 		var cost := ("  • %d energia" % int(ab.energy)) if ab.energy > 0 else ""
 		var cd := ("  • recarga %.1fs" % ab.cooldown) if slot != "ult" else "  • carga por dano"
-		s.append("[b]%s: %s[/b] [color=%s](%s)[/color][color=#9aa6b8]%s%s[/color]\n%s" % [
-			labels[slot], ab.name, GameData.type_color(ab.move_type).to_html(false), GameData.type_name(ab.move_type), cd, cost, ab.description])
-	s.append("")
+		text.text = "[b]%s: %s[/b] [color=%s](%s)[/color][color=#9aa6b8]%s%s[/color]\n%s" % [
+			labels[slot], ab.name, GameData.type_color(ab.move_type).to_html(false), GameData.type_name(ab.move_type), cd, cost, ab.description]
+		row.add_child(text)
+
+
+func _describe_assets(form: FormDef, sprite_set: PMDSpriteSet) -> String:
+	var s := PackedStringArray()
 	s.append("[b]Sprites (PMD Sprite Importer)[/b]: %d animações importadas de [code]%s[/code]" % [sprite_set.anims.size(), sprite_set.folder])
 	s.append(CreditsDB.summary_bbcode(sprite_set.folder))
 	if form.portrait != "":
 		s.append("[b]Retrato[/b]")
 		s.append(CreditsDB.summary_bbcode(form.portrait.get_base_dir(), PackedStringArray(["Normal"])))
 	return "\n".join(s)
+
+
+func _rich_label() -> RichTextLabel:
+	var l := RichTextLabel.new()
+	l.bbcode_enabled = true
+	l.fit_content = true
+	l.scroll_active = false
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.add_theme_font_size_override("normal_font_size", 16)
+	l.add_theme_font_size_override("bold_font_size", 17)
+	return l
+
+
+## Small round ability icon (type ring + SkillIcons shape).
+class _AbilityIcon:
+	extends Control
+	var shape := "star"
+	var tint := Color.WHITE
+	var ring := Color.WHITE
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var r := minf(size.x, size.y) * 0.5
+		draw_circle(c, r, Color(0.06, 0.08, 0.11, 0.95))
+		draw_arc(c, r - 1.0, 0, TAU, 32, ring, 2.0)
+		SkillIcons.draw_icon(self, shape, c, r * 1.25, tint)

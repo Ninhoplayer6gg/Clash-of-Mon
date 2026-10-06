@@ -22,6 +22,8 @@ var show_hitboxes := false
 var total_hits := 0
 var _info := DamageInfo.new()
 var _time := 0.0
+## v0.2 polish: hit-stop controller of the match (null = none).
+var hit_stop: HitStop
 
 
 func _ready() -> void:
@@ -363,8 +365,11 @@ func apply_hit(attacker: Fighter, target: Fighter, ability: AbilityDef, a: Dicti
 	var eff := info.effectiveness_label()
 	var col := GameData.type_color(info.move_type)
 	vfx.hit_spark(target.position + Vector2(0, -target.body_height * 0.45), col, clampf(amount / 120.0, 0.6, 2.2))
+	TypeVfx.hit(vfx, target.position + Vector2(0, -target.body_height * 0.45), info.move_type, clampf(amount / 120.0, 0.6, 2.2))
 	overlay.add_damage(target.position + Vector2(0, -target.body_height - 4.0), amount, eff, target.is_player)
-	Audio.play("hit_heavy" if info.power >= 380.0 else "hit", target.position)
+	Audio.play_hit(info.move_type, info.power >= 380.0, target.position)
+	if hit_stop and (target.is_player or (attacker and is_instance_valid(attacker) and attacker.is_player)):
+		hit_stop.on_heavy_hit(info.power)
 	if info.power >= 380.0:
 		request_shake(clampf(info.power / 160.0, 2.0, 6.0), 0.18, attacker, target)
 	if Settings.vibration and target.is_player and info.power >= 250.0:
@@ -397,10 +402,26 @@ func request_shake(amount: float, time: float, a: Fighter = null, b: Fighter = n
 
 # ----------------------------------------------------------------- drawing
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	queue_redraw()
 	if ground_fx:
 		ground_fx.queue_redraw()
+	_emit_trails(delta)
+
+
+## v0.2 polish: light type/style trails behind projectiles (visual only,
+## skipped when the particle layer is busy so hits keep their feedback).
+func _emit_trails(delta: float) -> void:
+	if vfx == null or projectiles.is_empty() or not vfx.has_room(0.7):
+		return
+	var interval := 0.032 / maxf(Settings.particle_scale(), 0.2)
+	for p in projectiles:
+		p.trail += delta
+		if p.trail < interval:
+			continue
+		p.trail = 0.0
+		var t := String(p.action.get("type", p.ability.move_type if p.ability else "normal"))
+		TypeVfx.trail(vfx, p.pos - Vector2(0, p.height), p.dir, t, p.style, p.color, p.color2)
 
 
 func _draw() -> void:

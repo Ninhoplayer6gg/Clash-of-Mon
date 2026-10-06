@@ -11,6 +11,9 @@ var lookahead := 26.0
 var _shake := 0.0
 var _shake_time := 0.0
 var _base_offset := Vector2.ZERO
+## v0.2 polish: extra zoom factor on top of the fitted zoom (KO punch-in).
+var _fit_z := 1.0
+var _zoom_mult := 1.0
 
 
 func _ready() -> void:
@@ -31,7 +34,14 @@ func set_bounds(r: Rect2, margin: float = 48.0) -> void:
 func _fit_zoom() -> void:
 	var vs := get_viewport_rect().size
 	var z := minf(vs.x / MIN_VISIBLE.x, vs.y / MIN_VISIBLE.y)
-	zoom = Vector2(z, z)
+	_fit_z = z
+	zoom = Vector2(z, z) * _zoom_mult
+
+
+## Multiplies the fitted zoom (1.0 = normal framing).
+func set_zoom_mult(m: float) -> void:
+	_zoom_mult = maxf(m, 0.1)
+	zoom = Vector2(_fit_z, _fit_z) * _zoom_mult
 
 
 func snap_to_target() -> void:

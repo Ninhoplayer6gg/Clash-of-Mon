@@ -33,6 +33,12 @@ var _ui_layer: CanvasLayer
 var _pause: PauseOverlay
 var _result: ResultOverlay
 var _pending_swaps: Array = []  # [time_left, team_index, new_index]
+# v0.2 polish: game feel helpers (see _build_polish).
+var hit_stop: HitStop
+var feedback: ScreenFeedback
+var offscreen: OffscreenIndicator
+var tutorial: TutorialOverlay
+var _tutorial_from_pause := false
 
 
 func _ready() -> void:
@@ -44,6 +50,7 @@ func _ready() -> void:
 	_build_scene()
 	_build_teams()
 	_start_intro()
+	_build_polish()
 	DebugOverlay.match_ref = self
 
 
@@ -283,13 +290,17 @@ func _on_fighter_fainted(f: Fighter) -> void:
 	if f.team == 0:
 		hud.set_center_text("%s foi derrotado!" % f.species.name, 1.2)
 	else:
-		hud.set_center_text("Nocaute!", 1.0)
+		hud.set_center_text_styled("NOCAUTE!", 1.1, "ko")
+	TypeVfx.ko(vfx, f.position + Vector2(0, -f.body_height * 0.4), f.team_color)
 	if training:
 		# Training: revive after a short delay, never end the session.
 		get_tree().create_timer(1.6, false).timeout.connect(func(): _training_revive(f))
 		return
 	if team.is_defeated():
+		var deciding := phase != Phase.END
 		_end_match(other.index, "")
+		if deciding:
+			_deciding_ko(f, other.index)
 		return
 	var next := team.next_available(1)
 	_pending_swaps.append([float(GameData.cfg("switching", "swap_time", 0.35)) + 0.9, team.index, next])
@@ -383,6 +394,8 @@ func toggle_pause() -> void:
 	if phase == Phase.END and _result.visible:
 		return
 	var p := not get_tree().paused
+	if p and hit_stop:
+		hit_stop.cancel()
 	get_tree().paused = p
 	_pause.visible = p
 	if p:
@@ -402,6 +415,10 @@ func quit_to_menu() -> void:
 func _on_settings_changed() -> void:
 	world.show_hitboxes = Settings.show_hitboxes or bool(options.get("show_hitboxes", false))
 	controls.visible = Settings.use_touch_controls()
+	if hit_stop:
+		hit_stop.enabled = _hit_stop_allowed()
+		if not hit_stop.enabled:
+			hit_stop.cancel()
 
 
 func _notification(what: int) -> void:
@@ -437,3 +454,90 @@ func debug_lines() -> PackedStringArray:
 		out.append("    HP %d/%d EN %.0f ULT %.0f MEGA %.0f | %s | st %s" % [
 			f.hp, f.max_hp, f.energy, f.ult_charge, f.mega_charge, " ".join(cds), ",".join(f.status.visible_ids())])
 	return out
+
+
+# ------------------------------------------------------- v0.2 game feel
+
+## Hit-stop, low-HP vignette, offscreen enemy marker, cast whoosh and the
+## first-match tutorial. Built after the scene and teams exist.
+func _build_polish() -> void:
+	hit_stop = HitStop.new()
+	hit_stop.name = "HitStop"
+	hit_stop.camera = camera
+	add_child(hit_stop)
+	hit_stop.enabled = _hit_stop_allowed()
+	world.hit_stop = hit_stop
+	feedback = ScreenFeedback.new()
+	feedback.match_node = self
+	_ui_layer.add_child(feedback)
+	_ui_layer.move_child(feedback, 0)  # below the HUD
+	feedback.watch(world)
+	offscreen = OffscreenIndicator.new()
+	offscreen.match_node = self
+	_ui_layer.add_child(offscreen)
+	tutorial = TutorialOverlay.new()
+	tutorial.visible = false
+	_pause.get_parent().add_child(tutorial)
+	tutorial.closed.connect(_on_tutorial_closed)
+	for t in teams:
+		for f in t.fighters:
+			f.cast_started.connect(_on_cast_started)
+	if _should_auto_tutorial():
+		show_tutorial(false)
+
+
+func _has_local_player() -> bool:
+	return not teams.is_empty() and teams[0].controller == "player"
+
+
+## Real players only: bots/tests run headless and must not depend on the
+## wall clock the hit-stop uses.
+func _hit_stop_allowed() -> bool:
+	return Settings.hit_stop and _has_local_player() and DisplayServer.get_name() != "headless"
+
+
+func _should_auto_tutorial() -> bool:
+	return not Settings.tutorial_seen and _has_local_player() and DisplayServer.get_name() != "headless"
+
+
+## Opens "Como jogar" (pauses the match; from the pause menu it returns there).
+func show_tutorial(from_pause: bool) -> void:
+	_tutorial_from_pause = from_pause
+	if hit_stop:
+		hit_stop.cancel()
+	get_tree().paused = true
+	_pause.visible = false
+	controls.reset_state()
+	tutorial.open(Settings.use_touch_controls())
+
+
+func _on_tutorial_closed() -> void:
+	if not Settings.tutorial_seen:
+		Settings.set_value("tutorial_seen", true)
+	if _tutorial_from_pause:
+		_pause.visible = true
+	elif not _result.visible:
+		get_tree().paused = false
+
+
+func _on_cast_started(f: Fighter, slot: String) -> void:
+	if slot == "basic" or slot == "mega":
+		return
+	var ab := f.ability(slot)
+	if ab and String(ab.raw.get("sfx", "")) == "":
+		Audio.play("cast", f.position, -4.0)
+
+
+## Match-deciding KO: punchy text, slow motion + camera punch-in on the
+## fallen fighter, then the result announcement.
+func _deciding_ko(f: Fighter, winner: int) -> void:
+	Audio.play("ko_big", f.position)
+	hud.set_center_text_styled("NOCAUTE!", 0.85, "ko")
+	if hit_stop and hit_stop.enabled:
+		camera.target = f
+		hit_stop.slowmo(0.55, 0.3)
+	get_tree().create_timer(0.85, false).timeout.connect(_announce_result.bind(winner))
+
+
+func _announce_result(winner: int) -> void:
+	hud.set_center_text("VITÓRIA!" if winner == 0 else ("EMPATE" if winner < 0 else "DERROTA"), 1.2)

@@ -8,6 +8,9 @@ const MAX_TEXTS := 28
 var world: CombatWorld
 var _texts: Array = []  # [pos, text, color, life, max, scale]
 var _font: Font
+## v0.2 polish: throttle for "Super efetivo!" / "Pouco efetivo" labels.
+const EFF_COOLDOWN := 1.1
+var _eff_cd := 0.0
 
 
 func _ready() -> void:
@@ -29,6 +32,12 @@ func add_damage(p: Vector2, amount: int, eff: String, on_player: bool) -> void:
 	if on_player:
 		col = col.lerp(Color(1.0, 0.45, 0.45), 0.6)
 	add_text(p + Vector2(randf_range(-5, 5), 0), str(amount), col, sc)
+	if eff != "" and _eff_cd <= 0.0:
+		_eff_cd = EFF_COOLDOWN
+		if eff == "super":
+			add_text(p + Vector2(0, -12), "Super efetivo!", Color(1.0, 0.86, 0.3), 0.8)
+		else:
+			add_text(p + Vector2(0, -12), "Pouco efetivo", Color(0.72, 0.78, 0.9), 0.75)
 
 
 func add_text(p: Vector2, text: String, col: Color, sc: float = 1.0) -> void:
@@ -38,6 +47,7 @@ func add_text(p: Vector2, text: String, col: Color, sc: float = 1.0) -> void:
 
 
 func _process(delta: float) -> void:
+	_eff_cd = maxf(0.0, _eff_cd - delta)
 	var i := _texts.size() - 1
 	while i >= 0:
 		var t: Array = _texts[i]

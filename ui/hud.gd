@@ -13,6 +13,9 @@ var _portraits: Array[TextureRect] = []
 var _bench_buttons: Array[Button] = []
 var _center_text := ""
 var _center_time := 0.0
+## v0.2 polish: announcement style ("" = default, "ko" = punchy NOCAUTE!).
+var _center_style := ""
+var _center_total := 0.0
 var _font: Font
 var _pause_btn: Button
 var _trail := [1.0, 1.0]  # delayed HP bars
@@ -101,6 +104,14 @@ func _layout() -> void:
 func set_center_text(t: String, duration: float) -> void:
 	_center_text = t
 	_center_time = duration
+	_center_style = ""
+
+
+## Announcement with a style ("ko": big red punch-in with streaks).
+func set_center_text_styled(t: String, duration: float, style: String) -> void:
+	set_center_text(t, duration)
+	_center_style = style
+	_center_total = duration
 
 
 func _process(delta: float) -> void:
@@ -142,7 +153,9 @@ func _draw() -> void:
 	_draw_bench_overlays()
 	if not Settings.use_touch_controls() and teams.size() > 0:
 		_draw_skill_bar(teams[0].active_fighter(), vs)
-	if _center_time > 0.0 and _center_text != "":
+	if _center_time > 0.0 and _center_text != "" and _center_style == "ko":
+		_draw_ko_text(vs)
+	elif _center_time > 0.0 and _center_text != "":
 		var fs := 64
 		var a := clampf(_center_time * 3.0, 0.0, 1.0)
 		var sz := _font.get_string_size(_center_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
@@ -284,7 +297,33 @@ func _draw_skill_bar(f: Fighter, vs: Vector2) -> void:
 		draw_style_box(_skill_box, r)
 		if frac > 0.0:
 			draw_rect(Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, (r.size.y - 6) * frac)), Color(0, 0, 0, 0.55))
-		var sz := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 24)
-		draw_string(_font, r.get_center() + Vector2(-sz.x * 0.5, 9), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE if ready else Color(0.6, 0.6, 0.6))
+		# v0.2 polish: procedural icon tinted by move type instead of letters.
+		var ab_i := f.ability(slot) if slot != "dash" else null
+		var shape := "dodge" if slot == "dash" else SkillIcons.shape_for(ab_i, f.form)
+		var ic := Color(0.75, 0.97, 1.0) if ab_i == null else SkillIcons.icon_color(ab_i.move_type)
+		if not ready:
+			ic = Color(ic.lerp(Color(0.55, 0.55, 0.58), 0.65), 0.75)
+		SkillIcons.draw_icon(self, shape, r.get_center(), size * 0.62, ic)
 		var kz := _font.get_string_size(keys[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 		draw_string(_font, Vector2(r.get_center().x - kz.x * 0.5, r.end.y + 16), keys[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, UITheme.MUTED)
+
+
+## v0.2 polish: "NOCAUTE!" announcement: punch-in scale, slight tilt and
+## shake, dark red outline with a yellow rim and two speed streaks.
+func _draw_ko_text(vs: Vector2) -> void:
+	var fs := 84
+	var age := _center_total - _center_time
+	var pop := 1.0 + 0.7 * maxf(0.0, 1.0 - age / 0.16)
+	var a := clampf(_center_time * 3.0, 0.0, 1.0)
+	var sz := _font.get_string_size(_center_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
+	var shake := Vector2(sin(age * 90.0), cos(age * 70.0)) * 5.0 * maxf(0.0, 1.0 - age / 0.3)
+	draw_set_transform(Vector2(vs.x * 0.5, vs.y * 0.36) + shake, -0.06, Vector2(pop, pop))
+	var w := (sz.x * 0.5 + 60.0) * minf(1.0, age / 0.18)
+	draw_rect(Rect2(-w, -fs * 0.62, w * 2.0, 6.0), Color(1.0, 0.85, 0.3, 0.75 * a))
+	draw_rect(Rect2(-w * 0.8, fs * 0.2, w * 1.6, 4.0), Color(1.0, 0.85, 0.3, 0.55 * a))
+	var p := Vector2(-sz.x * 0.5, fs * 0.08)
+	draw_string_outline(_font, p + Vector2(5, 6), _center_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 16, Color(0, 0, 0, 0.45 * a))
+	draw_string_outline(_font, p, _center_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 16, Color(0.3, 0.02, 0.02, 0.95 * a))
+	draw_string_outline(_font, p, _center_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 6, Color(1.0, 0.86, 0.32, a))
+	draw_string(_font, p, _center_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1.0, 0.3, 0.18, a))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
