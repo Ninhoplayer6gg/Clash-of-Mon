@@ -216,7 +216,35 @@ func is_ready(slot: String) -> bool:
 		return false
 	if slot == "ult" and ult_charge < 100.0:
 		return false
-	return energy >= ab.energy
+	return energy >= min_energy(ab)
+
+
+## Cheapest energy cost among an ability's stages/variants.
+func min_energy(ab: AbilityDef) -> float:
+	var e := ab.energy
+	var cv: Dictionary = ab.raw.get("close_variant", {})
+	if not cv.is_empty():
+		e = minf(e, float(cv.get("energy", ab.energy)))
+	return e
+
+
+## Picks the stage dictionary used for the next cast: combo step, active
+## variant (e.g. Outrage) or close-range variant (e.g. Charizard's claws).
+func pick_stage(ab: AbilityDef) -> Dictionary:
+	var st: Dictionary = ab.raw
+	if not ab.combo.is_empty():
+		st = ab.combo[combo_index % ab.combo.size()]
+	var variants: Dictionary = ab.raw.get("variants", {})
+	if not variants.is_empty():
+		for m in status.mods:
+			var v: String = m.get("variant", "")
+			if v != "" and variants.has(v):
+				return variants[v]
+	var cv: Dictionary = ab.raw.get("close_variant", {})
+	if not cv.is_empty() and world:
+		if world.nearest_enemy(self, float(cv.get("trigger_range", 52.0))) != null:
+			return cv
+	return st
 
 
 func can_mega() -> bool:
@@ -397,11 +425,14 @@ func try_cast(slot: String, aim_vec: Vector2, strength: float, from_buffer: bool
 	if slot == "ult" and ult_charge < 100.0:
 		cast_failed.emit(self, slot, "ult")
 		return false
-	if energy < ab.energy:
-		cast_failed.emit(self, slot, "energy")
+	var st := pick_stage(ab)
+	var cost := float(st.get("energy", ab.energy))
+	if energy < cost:
+		if not from_buffer:
+			cast_failed.emit(self, slot, "energy")
 		return false
 	var aim := resolve_aim(ab, aim_vec, strength)
-	_start_cast(ab, slot, aim[0], aim[1])
+	_start_cast(ab, slot, aim[0], aim[1], st, cost)
 	return true
 
 
@@ -435,7 +466,7 @@ func _ability_speed(ab: AbilityDef) -> float:
 	return 2000.0
 
 
-func _start_cast(ab: AbilityDef, slot: String, dir: Vector2, point: Vector2) -> void:
+func _start_cast(ab: AbilityDef, slot: String, dir: Vector2, point: Vector2, st: Dictionary, cost: float) -> void:
 	_cast_counter += 1
 	var c := CastState.new()
 	c.ability = ab
@@ -443,20 +474,9 @@ func _start_cast(ab: AbilityDef, slot: String, dir: Vector2, point: Vector2) -> 
 	c.id = _cast_counter
 	c.aim_dir = dir
 	c.aim_point = point
-	var stage_index := 0
 	if not ab.combo.is_empty():
-		stage_index = combo_index % ab.combo.size()
 		combo_index += 1
 		combo_timer = ab.combo_window
-	var st: Dictionary = ab.stage(stage_index)
-	# Variant (e.g. empowered basic during Outrage) from an active modifier.
-	var variants: Dictionary = ab.raw.get("variants", {})
-	if not variants.is_empty():
-		for m in status.mods:
-			var v: String = m.get("variant", "")
-			if v != "" and variants.has(v):
-				st = variants[v]
-				break
 	c.stage = st
 	var spd := float(st.get("anim_speed", ab.anim_speed)) * status.attack_speed_mult()
 	c.anim = st.get("anim", ab.anim)
@@ -483,8 +503,8 @@ func _start_cast(ab: AbilityDef, slot: String, dir: Vector2, point: Vector2) -> 
 	aim_dir = dir
 	animator.set_direction_vector(dir)
 	animator.play(c.anim, spd, true, 1 if st.get("anim_loop", false) else 0)
-	energy -= ab.energy
-	if ab.energy > 0.0:
+	energy -= cost
+	if cost > 0.0 and slot != "basic":
 		energy_delay = float(GameData.cfg("energy", "regen_delay", 0.45))
 	cooldowns[slot] = 0.0 if instant_cooldown else ab.cooldown
 	if slot == "ult":

@@ -160,7 +160,7 @@ func _build_teams() -> void:
 		var bot := BotController.new()
 		bot.name = "Bot%d" % team.index
 		bot.world = world
-		bot.behavior = String(options.get("bot_behavior", "active"))
+		bot.behavior = String(config["teams"][team.index].get("behavior", options.get("bot_behavior", "active")))
 		bot.difficulty = clampi(int(options.get("bot_difficulty", 1)), 0, 2)
 		bot.can_switch = team.fighters.size() > 1
 		add_child(bot)

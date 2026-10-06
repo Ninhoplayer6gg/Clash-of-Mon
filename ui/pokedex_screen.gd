@@ -175,11 +175,14 @@ func _describe(def: PokemonDef, form: FormDef, sprite_set: PMDSpriteSet) -> Stri
 	s.append(def.description)
 	s.append("")
 	s.append("[b]Atributos[/b]")
+	var table := "[table=3]"
 	for k in [["hp", "HP"], ["attack", "Ataque"], ["defense", "Defesa"], ["sp_attack", "At. Esp."], ["sp_defense", "Def. Esp."], ["move_speed", "Velocidade"]]:
 		var v := form.stat(k[0])
-		var bar_max := 4200.0 if k[0] == "hp" else 150.0
+		var bar_max := 4400.0 if k[0] == "hp" else 150.0
 		var n := int(clampf(v / bar_max, 0.0, 1.0) * 20.0)
-		s.append("[code]%-10s %5d [/code][color=#ffd23f]%s[/color][color=#333a44]%s[/color]" % [k[1], int(v), "█".repeat(n), "█".repeat(20 - n)])
+		table += "[cell]%s  [/cell][cell][right]%d  [/right][/cell][cell][color=#ffd23f]%s[/color][color=#333a44]%s[/color][/cell]" % [k[1], int(v), "█".repeat(n), "█".repeat(20 - n)]
+	table += "[/table]"
+	s.append(table)
 	s.append("")
 	s.append("[b]Passiva — %s[/b]\n%s" % [form.passive.get("name", ""), form.passive.get("description", "")])
 	s.append("")

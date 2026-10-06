@@ -107,6 +107,9 @@ func update(delta: float) -> void:
 		if immunity[id] <= 0.0:
 			immunity.erase(id)
 	for id in effects.keys():
+		# A DoT tick can faint the fighter and clear every effect mid-loop.
+		if not effects.has(id):
+			continue
 		var e: Dictionary = effects[id]
 		e["time"] -= delta
 		var def := GameData.status_def(id)
@@ -118,6 +121,8 @@ func update(delta: float) -> void:
 				e["tick"] += interval
 				var amount := fighter.max_hp * dps_pct * interval * int(e["stacks"])
 				fighter.take_dot(int(round(amount)), e["source"], id)
+				if not effects.has(id):
+					continue
 		if e["time"] <= 0.0:
 			remove(id)
 	var i := mods.size() - 1
@@ -245,10 +250,15 @@ func tint() -> Color:
 	return Color.WHITE
 
 
-## Ordered list of visible status ids (for HUD chips).
+const _VISIBLE_ORDER := ["burn", "poison", "paralysis", "freeze", "sleep", "slow", "vulnerable"]
+var _visible: Array = []
+
+
+## Ordered list of visible status ids (for HUD chips). The returned array is
+## reused between calls: read it, don't keep it.
 func visible_ids() -> Array:
-	var out := []
-	for id in ["burn", "poison", "paralysis", "freeze", "sleep", "slow", "vulnerable"]:
+	_visible.clear()
+	for id in _VISIBLE_ORDER:
 		if effects.has(id):
-			out.append(id)
-	return out
+			_visible.append(id)
+	return _visible

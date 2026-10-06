@@ -19,7 +19,7 @@ func _start() -> void:
 	var what := args[0] if args.size() > 0 else "match"
 	_out = args[1] if args.size() > 1 else "/tmp/shot"
 	_target = int(args[2]) if args.size() > 2 else 120
-	_shots = [_target / 2, _target]
+	_shots = [_target / 4, _target / 2, _target * 3 / 4, _target]
 	if what == "match":
 		var game := root.get_node("/root/Game")
 		var a: Array = (args[3] if args.size() > 3 else "pikachu").split(",")
@@ -29,6 +29,12 @@ func _start() -> void:
 		game.match_config = cfg
 		if args.size() > 7:
 			root.get_node("/root/Settings").touch_controls = args[7]
+		if args.size() > 8 and args[8] == "debug":
+			var st := root.get_node("/root/Settings")
+			st.debug_overlay = true
+			st.show_hitboxes = true
+			st.apply()
+			cfg["training"] = true
 		_node = load("res://core/match.tscn").instantiate()
 	else:
 		_node = load(what).instantiate()

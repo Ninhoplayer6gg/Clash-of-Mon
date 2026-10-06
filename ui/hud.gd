@@ -16,6 +16,12 @@ var _center_time := 0.0
 var _font: Font
 var _pause_btn: Button
 var _trail := [1.0, 1.0]  # delayed HP bars
+var _bench_active := -1
+var _active_box := UITheme._box(Color(0.25, 0.22, 0.1, 0.9), UITheme.ACCENT, 3, 10)
+# Style boxes reused every frame (no per-frame allocations).
+var _card_box := UITheme._box(Color(0.06, 0.08, 0.11, 0.72), Color.WHITE, 2, 12)
+var _timer_box := UITheme._box(Color(0.06, 0.08, 0.11, 0.75), Color(1, 1, 1, 0.25), 2, 18)
+var _skill_box := UITheme._box(Color(0.06, 0.08, 0.11, 0.8), Color.WHITE, 3, 10)
 
 
 func _ready() -> void:
@@ -115,8 +121,15 @@ func _update_bench() -> void:
 	for i in _bench_buttons.size():
 		var b := _bench_buttons[i]
 		var f := team.fighters[i]
-		b.disabled = not f.is_alive() or i == team.active or team.switch_cd > 0.0
-		b.modulate = Color(0.35, 0.35, 0.35) if not f.is_alive() else (Color(1, 1, 0.75) if i == team.active else Color.WHITE)
+		var active := i == team.active
+		b.disabled = not f.is_alive() or (not active and team.switch_cd > 0.0)
+		b.modulate = Color(0.35, 0.35, 0.35) if not f.is_alive() else Color.WHITE
+		if _bench_active != team.active:
+			if active:
+				b.add_theme_stylebox_override("normal", _active_box)
+			else:
+				b.remove_theme_stylebox_override("normal")
+	_bench_active = team.active
 
 
 func _draw() -> void:
@@ -144,7 +157,8 @@ func _draw_card(team: TeamState, origin: Vector2, mirrored: bool) -> void:
 		return
 	var w := 360.0
 	var card := Rect2(origin, Vector2(w + 70, 84))
-	draw_style_box(UITheme._box(Color(0.06, 0.08, 0.11, 0.72), Color(team.color, 0.7), 2, 12), card)
+	_card_box.border_color = Color(team.color, 0.7)
+	draw_style_box(_card_box, card)
 	var x0 := origin.x + (8.0 if mirrored else 76.0)
 	var name_txt := f.form.name
 	draw_string(_font, Vector2(x0, origin.y + 26), name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
@@ -210,7 +224,7 @@ func _draw_timer(vs: Vector2) -> void:
 	var fs := 26
 	var sz := _font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 	var r := Rect2(Vector2((vs.x - sz.x) * 0.5 - 14, 12), Vector2(sz.x + 28, 38))
-	draw_style_box(UITheme._box(Color(0.06, 0.08, 0.11, 0.75), Color(1, 1, 1, 0.25), 2, 18), r)
+	draw_style_box(_timer_box, r)
 	var col := Color(1.0, 0.4, 0.35) if t >= 0.0 and t < 15.0 else Color.WHITE
 	draw_string(_font, Vector2(r.position.x + 14, r.position.y + 28), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 
@@ -231,7 +245,7 @@ func _draw_bench_overlays() -> void:
 			var txt := str(int(ceil(team.switch_cd)))
 			draw_string_outline(_font, r.get_center() + Vector2(-6, 8), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, 4, Color.BLACK)
 			draw_string(_font, r.get_center() + Vector2(-6, 8), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color.WHITE)
-	if _bench_buttons.size() > 0:
+	if _bench_buttons.size() > 0 and not Settings.use_touch_controls():
 		draw_string(_font, Vector2(24 + _bench_buttons.size() * 60, 136), "Q/E: trocar", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, UITheme.MUTED)
 
 
@@ -266,7 +280,8 @@ func _draw_skill_bar(f: Fighter, vs: Vector2) -> void:
 			ready = f.is_ready(slot)
 			if slot == "ult":
 				frac = 1.0 - f.ult_charge / 100.0
-		draw_style_box(UITheme._box(Color(0.06, 0.08, 0.11, 0.8), ring if ready else Color(0.4, 0.4, 0.45), 3, 10), r)
+		_skill_box.border_color = ring if ready else Color(0.4, 0.4, 0.45)
+		draw_style_box(_skill_box, r)
 		if frac > 0.0:
 			draw_rect(Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, (r.size.y - 6) * frac)), Color(0, 0, 0, 0.55))
 		var sz := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 24)

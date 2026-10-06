@@ -64,7 +64,7 @@ func _build_parade() -> void:
 		var lib := AnimLibrary.new(PMDSpriteImporter.load_sprite_set(form.sprite_folder), form.anim_map)
 		var holder := Node2D.new()
 		holder.scale = Vector2(3, 3)
-		holder.position = Vector2(-120 - i * 230, vs.y - 70)
+		holder.position = Vector2(80 + i * 230, vs.y - 70)
 		_parade_root.add_child(holder)
 		var anim := PMDAnimator.new()
 		anim.setup(lib)
@@ -84,5 +84,5 @@ func _process(delta: float) -> void:
 		holder.position.x += p[2] * delta
 		holder.position.y = vs.y - 70
 		if holder.position.x > vs.x + 120:
-			holder.position.x -= vs.x + 240 + 230 * 2
+			holder.position.x -= 230.0 * _parade.size()
 		anim.advance(delta)

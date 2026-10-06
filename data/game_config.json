@@ -9,7 +9,7 @@
 	"dash": {
 		"distance": 78.0,
 		"duration": 0.16,
-		"energy_cost": 30.0,
+		"energy_cost": 26.0,
 		"cooldown": 0.55,
 		"invulnerable_time": 0.14
 	},

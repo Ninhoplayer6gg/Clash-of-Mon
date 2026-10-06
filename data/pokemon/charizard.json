@@ -5,7 +5,7 @@
 	"role": "Atirador / Brigador",
 	"difficulty": 2,
 	"description": "Garras largas de perto e fogo de média distância. Flamethrower queima continuamente enquanto Charizard mira; Fire Blast deixa o chão em chamas. Fly salta sobre obstáculos e projéteis.",
-	"ai": {"range": 75, "style": "kite", "aggression": 0.65, "retreat_hp": 0.22},
+	"ai": {"range": 115, "style": "kite", "aggression": 0.65, "retreat_hp": 0.22},
 	"default_form": "base",
 	"forms": {
 		"base": {
@@ -14,7 +14,7 @@
 			"portrait": "res://assets/pmd/portrait/0006/Normal.png",
 			"types": ["fire", "flying"],
 			"stats": {
-				"hp": 3500, "attack": 104, "defense": 86, "sp_attack": 118, "sp_defense": 90,
+				"hp": 3800, "attack": 106, "defense": 92, "sp_attack": 118, "sp_defense": 90,
 				"move_speed": 124, "mass": 1.35, "radius": 11, "energy": 100, "energy_regen": 20
 			},
 			"passive": {
@@ -25,16 +25,25 @@
 			},
 			"abilities": {
 				"basic": {
-					"id": "slash", "name": "Slash", "icon": "SL",
-					"description": "Golpe de garra em arco largo.",
-					"type": "normal", "category": "physical",
-					"cooldown": 0.42, "energy": 0, "range": 44, "aim": "direction",
-					"anim": "swing", "cast_time": 0.36, "move_mult": 0.25, "sfx": "swing",
-					"ai": {"max": 44},
+					"id": "ember_slash", "name": "Ember / Slash", "icon": "EM",
+					"description": "Básico híbrido: de longe cospe brasas (custa energia, pode queimar); com o inimigo colado, troca sozinho para uma garrada larga e gratuita.",
+					"type": "fire", "category": "special",
+					"cooldown": 0.42, "energy": 7, "range": 165, "aim": "direction",
+					"anim": "shoot", "anim_speed": 1.3, "cast_time": 0.32, "move_mult": 0.4, "sfx": "fire",
+					"ai": {"max": 165},
 					"actions": [
-						{"at": "hit", "do": "melee", "shape": "sector", "radius": 36, "angle": 130, "offset": 2, "power": 170, "knockback": 90, "contact": true,
-						 "vfx": {"style": "slash", "color": "#ffb36b"}}
-					]
+						{"at": "hit", "do": "projectile", "speed": 330, "range": 165, "radius": 6, "power": 125, "knockback": 40,
+						 "status": {"id": "burn", "chance": 0.1},
+						 "vfx": {"style": "fire", "color": "#fff2a8", "color2": "#ff7a2f", "size": 6}}
+					],
+					"close_variant": {
+						"trigger_range": 54, "energy": 0, "anim": "swing", "cast_time": 0.36, "move_mult": 0.25, "sfx": "swing",
+						"actions": [
+							{"at": "hit", "do": "melee", "shape": "sector", "radius": 36, "angle": 130, "offset": 2, "power": 175, "knockback": 90, "contact": true,
+							 "type": "normal", "category": "physical",
+							 "vfx": {"style": "slash", "color": "#ffb36b"}}
+						]
+					}
 				},
 				"skill1": {
 					"id": "flamethrower", "name": "Flamethrower", "icon": "FT",
@@ -45,7 +54,7 @@
 					"ai": {"max": 85, "use": "engage"},
 					"actions": [
 						{"at": 0.08, "do": "melee", "shape": "sector", "radius": 88, "angle": 46, "offset": 6, "duration": 0.9, "interval": 0.15, "hits": 6,
-						 "bound": true, "follow_aim": true, "power": 78, "knockback": 30, "kb_dir": "forward",
+						 "bound": true, "follow_aim": true, "power": 95, "knockback": 30, "kb_dir": "forward",
 						 "status": {"id": "burn", "chance": 0.22},
 						 "vfx": {"style": "cone", "color": "#ff7a2f"}}
 					]
@@ -58,7 +67,7 @@
 					"anim": "special", "cast_time": 0.45, "move_mult": 0.1, "sfx": "fire",
 					"ai": {"max": 250, "use": "poke"},
 					"actions": [
-						{"at": "hit", "do": "projectile", "speed": 250, "range": 260, "radius": 11, "power": 380, "knockback": 160, "explode_on_end": true,
+						{"at": "hit", "do": "projectile", "speed": 250, "range": 260, "radius": 11, "power": 400, "knockback": 160, "explode_on_end": true,
 						 "status": {"id": "burn", "chance": 0.5},
 						 "explode": {"radius": 40, "power": 150, "knockback": 170, "duration": 0.1, "status": {"id": "burn", "chance": 0.5},
 						             "vfx": {"style": "burst", "color": "#ff7a2f"},

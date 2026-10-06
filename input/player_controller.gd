@@ -77,8 +77,9 @@ func _physics_process(delta: float) -> void:
 	# Touch controls
 	if touch:
 		controls.fighter = fighter
-		for r in controls.pop_requests():
+		for r in controls.requests:
 			inp.request_cast(r[0], r[1], r[2])
+		controls.requests.clear()
 		if controls.basic_held and inp.cast_slot == "" and fighter.is_ready("basic") and fighter.can_act():
 			inp.request_cast("basic", controls.basic_aim, 1.0)
 		if controls.dash_requested:

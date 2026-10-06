@@ -14,8 +14,8 @@
 			"portrait": "res://assets/pmd/portrait/0094/Normal.png",
 			"types": ["ghost", "poison"],
 			"stats": {
-				"hp": 2800, "attack": 90, "defense": 78, "sp_attack": 126, "sp_defense": 88,
-				"move_speed": 132, "mass": 0.9, "radius": 9, "energy": 100, "energy_regen": 22
+				"hp": 2900, "attack": 90, "defense": 80, "sp_attack": 130, "sp_defense": 88,
+				"move_speed": 132, "mass": 0.9, "radius": 9, "energy": 100, "energy_regen": 25
 			},
 			"anim_map": {"lick": ["Lick", "Shoot"], "spin": ["Twirl", "Rotate"]},
 			"passive": {
@@ -29,11 +29,11 @@
 					"id": "sludge", "name": "Sludge", "icon": "SG",
 					"description": "Bolha tóxica de médio alcance com chance de envenenar.",
 					"type": "poison", "category": "special",
-					"cooldown": 0.42, "energy": 0, "range": 175, "aim": "direction",
+					"cooldown": 0.42, "energy": 9, "range": 180, "aim": "direction",
 					"anim": "shoot", "anim_speed": 1.8, "cast_time": 0.3, "move_mult": 0.5, "sfx": "shadow",
 					"ai": {"max": 170},
 					"actions": [
-						{"at": "hit", "do": "projectile", "speed": 350, "range": 175, "radius": 6, "power": 112, "knockback": 40,
+						{"at": "hit", "do": "projectile", "speed": 350, "range": 180, "radius": 6, "power": 118, "knockback": 40,
 						 "status": {"id": "poison", "chance": 0.3},
 						 "vfx": {"style": "orb", "color": "#e3b5ff", "color2": "#9b3fc7", "size": 6}}
 					]
@@ -47,7 +47,7 @@
 					"ai": {"max": 250, "use": "poke"},
 					"actions": [
 						{"at": "hit", "do": "projectile", "speed": 240, "accel": 200, "max_speed": 480, "range": 260, "radius": 10,
-						 "power": 360, "knockback": 120, "hitstun": 0.15,
+						 "power": 385, "knockback": 120, "hitstun": 0.15,
 						 "status": {"id": "vulnerable", "chance": 1.0},
 						 "vfx": {"style": "orb", "color": "#b78cff", "color2": "#2b1645", "size": 10}}
 					]
@@ -56,7 +56,7 @@
 					"id": "hypnosis", "name": "Hypnosis", "icon": "HY",
 					"description": "Onda lenta que faz o alvo dormir por 1,3s. Qualquer dano acorda o alvo (e ele fica imune a sono por 6s).",
 					"type": "psychic", "category": "status",
-					"cooldown": 10.0, "energy": 25, "range": 210, "aim": "direction",
+					"cooldown": 9.0, "energy": 25, "range": 210, "aim": "direction",
 					"anim": "charge", "cast_time": 0.4, "move_mult": 0.0, "sfx": "charge",
 					"ai": {"max": 200, "use": "poke"},
 					"actions": [

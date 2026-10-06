@@ -5,7 +5,7 @@
 	"role": "Lutador Híbrido",
 	"difficulty": 2,
 	"description": "Combos corpo a corpo fortes e um projétil teleguiado devastador. Fica mais perigoso quanto menos HP tiver: a Aura amplifica todo o seu dano.",
-	"ai": {"range": 40, "style": "brawler", "aggression": 0.75, "retreat_hp": 0.18},
+	"ai": {"range": 26, "style": "brawler", "aggression": 0.8, "retreat_hp": 0.15},
 	"default_form": "base",
 	"forms": {
 		"base": {
@@ -15,7 +15,7 @@
 			"types": ["fighting", "steel"],
 			"stats": {
 				"hp": 3200, "attack": 112, "defense": 88, "sp_attack": 110, "sp_defense": 80,
-				"move_speed": 128, "mass": 1.0, "radius": 9, "energy": 100, "energy_regen": 20
+				"move_speed": 132, "mass": 1.0, "radius": 9, "energy": 100, "energy_regen": 20
 			},
 			"anim_map": {"special": ["Charge", "SpAttack"]},
 			"passive": {
@@ -32,16 +32,16 @@
 					"cooldown": 0.3, "energy": 0, "range": 46, "aim": "direction",
 					"anim": "attack", "cast_time": 0.28, "move_mult": 0.25,
 					"combo_window": 0.8,
-					"ai": {"max": 46},
+					"ai": {"max": 36},
 					"combo": [
 						{"anim": "attack", "cast_time": 0.27, "move_mult": 0.3, "sfx": "swing",
-						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 28, "angle": 110, "offset": 3, "power": 125, "knockback": 60, "contact": true,
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 28, "angle": 110, "offset": 3, "power": 132, "knockback": 60, "contact": true,
 						              "vfx": {"style": "slash", "color": "#8fd3ff"}}]},
 						{"anim": "strike", "cast_time": 0.27, "move_mult": 0.3, "sfx": "swing",
-						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 28, "angle": 110, "offset": 3, "power": 135, "knockback": 70, "contact": true,
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 28, "angle": 110, "offset": 3, "power": 142, "knockback": 70, "contact": true,
 						              "vfx": {"style": "slash", "color": "#8fd3ff"}}]},
 						{"anim": "swing", "cast_time": 0.38, "move_mult": 0.15, "sfx": "swing",
-						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 32, "angle": 140, "offset": 3, "power": 215, "knockback": 230, "hitstun": 0.18, "contact": true,
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 32, "angle": 140, "offset": 3, "power": 225, "knockback": 230, "hitstun": 0.18, "contact": true,
 						              "vfx": {"style": "slash", "color": "#4fb4ff"}}]}
 					]
 				},
@@ -51,7 +51,7 @@
 					"type": "fighting", "category": "physical",
 					"cooldown": 5.0, "energy": 20, "range": 50, "aim": "direction",
 					"anim": "strike", "cast_time": 0.42, "move_mult": 0.0, "sfx": "swing",
-					"ai": {"max": 55, "use": "engage"},
+					"ai": {"max": 48, "use": "engage"},
 					"actions": [
 						{"at": 0.0, "do": "dash", "distance": 26, "duration": 0.1, "afterimages": false},
 						{"at": "hit", "do": "melee", "shape": "circle", "offset": 18, "radius": 17, "power": 380, "knockback": 340, "hitstun": 0.26, "contact": true,
@@ -79,10 +79,10 @@
 					"cooldown": 4.2, "energy": 15, "range": 150, "aim": "direction",
 					"anim": "quick", "cast_time": 0.2, "move_mult": 0.0,
 					"tags": ["mobility"],
-					"ai": {"max": 160, "use": "engage"},
+					"ai": {"min": 55, "max": 160, "use": "engage"},
 					"actions": [
 						{"at": 0.0, "do": "dash", "distance": 150, "duration": 0.14, "invulnerable": 0.14,
-						 "hit": {"shape": "circle", "radius": 13, "power": 190, "knockback": 110, "hitstun": 0.14, "contact": true,
+						 "hit": {"shape": "circle", "radius": 13, "power": 190, "knockback": 110, "hitstun": 0.18, "contact": true, "stop_owner_on_hit": true,
 						         "vfx": {"style": "none", "color": "#ffffff"}}}
 					]
 				},

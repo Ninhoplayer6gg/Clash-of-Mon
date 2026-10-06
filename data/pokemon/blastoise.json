@@ -14,7 +14,7 @@
 			"portrait": "res://assets/pmd/portrait/0009/Normal.png",
 			"types": ["water"],
 			"stats": {
-				"hp": 4300, "attack": 92, "defense": 120, "sp_attack": 102, "sp_defense": 112,
+				"hp": 3950, "attack": 92, "defense": 114, "sp_attack": 102, "sp_defense": 112,
 				"move_speed": 108, "mass": 1.8, "radius": 12, "energy": 100, "energy_regen": 19
 			},
 			"anim_map": {"shell": ["Withdraw"], "spin": ["Rotate", "Ricochet"]},
@@ -30,7 +30,7 @@
 					"id": "water_gun", "name": "Water Gun", "icon": "WG",
 					"description": "Dois jatos rápidos dos canhões.",
 					"type": "water", "category": "special",
-					"cooldown": 0.5, "energy": 0, "range": 195, "aim": "direction",
+					"cooldown": 0.5, "energy": 10, "range": 195, "aim": "direction",
 					"anim": "shoot", "cast_time": 0.3, "move_mult": 0.45, "sfx": "water",
 					"ai": {"max": 190},
 					"actions": [
@@ -49,7 +49,7 @@
 					"ai": {"max": 250, "use": "poke"},
 					"actions": [
 						{"at": 0.0, "do": "beam", "length": 260, "width": 10, "delay": 0.34, "duration": 0.36, "hits": 2, "interval": 0.16,
-						 "power": 250, "knockback": 260, "hitstun": 0.2, "kb_dir": "forward", "sfx": "water",
+						 "power": 230, "knockback": 260, "hitstun": 0.2, "kb_dir": "forward", "sfx": "water",
 						 "vfx": {"style": "beam", "color": "#4aa3ff"}}
 					]
 				},

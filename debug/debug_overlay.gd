@@ -5,6 +5,7 @@ extends CanvasLayer
 
 var _label: Label
 var _fps_label: Label
+var _panel: ColorRect
 var _acc := 0.0
 var match_ref: Node = null
 
@@ -12,6 +13,10 @@ var match_ref: Node = null
 func _ready() -> void:
 	layer = 100
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_panel = ColorRect.new()
+	_panel.color = Color(0, 0, 0, 0.45)
+	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_panel)
 	_fps_label = Label.new()
 	_fps_label.position = Vector2(8, 4)
 	_fps_label.add_theme_font_size_override("font_size", 14)
@@ -20,7 +25,7 @@ func _ready() -> void:
 	_fps_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_fps_label)
 	_label = Label.new()
-	_label.position = Vector2(8, 24)
+	_label.position = Vector2(14, 150)
 	_label.add_theme_font_size_override("font_size", 13)
 	_label.add_theme_color_override("font_color", Color(0.85, 1.0, 0.85))
 	_label.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -34,6 +39,7 @@ func _ready() -> void:
 func _refresh_visibility() -> void:
 	_fps_label.visible = Settings.show_fps or Settings.debug_overlay
 	_label.visible = Settings.debug_overlay
+	_panel.visible = Settings.debug_overlay
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -52,6 +58,8 @@ func _process(delta: float) -> void:
 	_acc = 0.0
 	var fps := Engine.get_frames_per_second()
 	_fps_label.text = "%d FPS  %.2f ms" % [fps, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0]
+	# Top centre, under the match timer, so it never covers the HUD cards.
+	_fps_label.position = Vector2(get_viewport().get_visible_rect().size.x * 0.5 - 70.0, 56.0)
 	if not _label.visible:
 		return
 	var lines: PackedStringArray = []
@@ -69,3 +77,5 @@ func _process(delta: float) -> void:
 	if match_ref and is_instance_valid(match_ref) and match_ref.has_method("debug_lines"):
 		lines.append_array(match_ref.debug_lines())
 	_label.text = "\n".join(lines)
+	_panel.position = _label.position - Vector2(6, 4)
+	_panel.size = _label.get_minimum_size() + Vector2(12, 8)

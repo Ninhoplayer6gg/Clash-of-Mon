@@ -35,6 +35,8 @@ var _unstick_dir := Vector2.ZERO
 var _last_pos := Vector2.ZERO
 var _stuck_acc := 0.0
 var _switch_cd := 2.0
+## Decision counters (debug overlay / balance tests).
+var stats := {}
 
 
 func _ready() -> void:
@@ -79,6 +81,7 @@ func _physics_process(delta: float) -> void:
 # --------------------------------------------------------------- decisions
 
 func _decide(target: Fighter) -> void:
+	stats["decisions"] = stats.get("decisions", 0) + 1
 	var to := target.position - fighter.position
 	var dist := to.length()
 	var dir := to / maxf(dist, 0.001)
@@ -101,6 +104,12 @@ func _decide(target: Fighter) -> void:
 		return
 	if not los:
 		_desired = dir
+	elif style == "brawler":
+		# Melee: walk straight in, circle a little once in range.
+		if dist > pref + 6.0:
+			_desired = (dir + strafe * 0.12).normalized()
+		else:
+			_desired = (strafe * 0.6 + dir * 0.4).normalized()
 	elif dist > pref + 25.0:
 		_desired = (dir + strafe * 0.25).normalized()
 	elif dist < pref - 25.0 and style == "kite":
@@ -112,9 +121,13 @@ func _decide(target: Fighter) -> void:
 	if fighter.can_mega() and dist < 260.0:
 		fighter.input.mega = true
 		return
-	if _rng.randf() > CAST_CHANCE[difficulty]:
+	var punish := target.status.is_asleep() or target.status.is_frozen()
+	if not punish and _rng.randf() > CAST_CHANCE[difficulty]:
 		return
 	var hints := ["finisher", "engage", "poke", "", "defense"]
+	if punish:
+		# Sleep/freeze combo: go for the biggest hit available.
+		hints = ["finisher", "poke", "engage", ""]
 	if style == "brawler" and dist > pref + 70.0:
 		hints.push_front("escape")  # mobility used to close the gap
 	_try_use(target, dist, los, hints, dir)
@@ -135,11 +148,12 @@ func _try_use(target: Fighter, dist: float, los: bool, hints: Array, fallback_di
 		var strength := clampf(dist / maxf(ab.reach, 1.0), 0.1, 1.0)
 		match use:
 			"escape":
-				if hints[0] == "escape" and fighter.hp_ratio() < float(profile.get("retreat_hp", 0.25)):
+				if fighter.hp_ratio() < float(profile.get("retreat_hp", 0.25)):
+					# Run away from the target.
 					aim = (fallback_dir + fallback_dir.orthogonal() * _strafe_sign * 0.5).normalized()
 					strength = 1.0
-				elif dist < max_r:
-					continue  # close enough already
+				elif dist < float(profile.get("range", 100.0)) + 50.0:
+					continue  # already close: keep mobility for later
 				fighter.input.request_cast(slot, aim, strength)
 				return
 			"finisher":
@@ -156,6 +170,7 @@ func _try_use(target: Fighter, dist: float, los: bool, hints: Array, fallback_di
 				if not los and ab.aim != "self":
 					continue
 		fighter.input.request_cast(slot, aim, strength)
+		stats[slot] = stats.get(slot, 0) + 1
 		return
 
 

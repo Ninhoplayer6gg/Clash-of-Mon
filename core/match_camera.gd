@@ -4,7 +4,7 @@ extends Camera2D
 ## keeps a minimum visible world area on any aspect ratio (16:9, 18:9,
 ## 19.5:9, tablets), arena limits and lightweight screen shake.
 
-const MIN_VISIBLE := Vector2(520, 292)
+const MIN_VISIBLE := Vector2(480, 270)
 
 var target: Node2D
 var lookahead := 26.0
