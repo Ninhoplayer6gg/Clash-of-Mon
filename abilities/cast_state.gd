@@ -21,6 +21,7 @@ var anim_speed := 1.0
 var hit_time := 0.0
 var cancel_after := 0.0  # time after which dash can cancel the recovery
 var is_transform := false
+var channel := false  # has cast-bound hitboxes (flamethrower, beams...)
 var transform_form := ""
 
 
@@ -30,3 +31,9 @@ func all_fired() -> bool:
 
 func can_dash_cancel() -> bool:
 	return all_fired() and elapsed >= cancel_after
+
+
+## Another ability may interrupt this cast once its effects are out
+## (recovery canceling), except channels which would lose their hitbox.
+func can_skill_cancel() -> bool:
+	return can_dash_cancel() and not channel and not is_transform

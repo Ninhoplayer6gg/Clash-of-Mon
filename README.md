@@ -103,7 +103,8 @@ Detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Como criar um Pokémon
 
 ```bash
 godot --headless --path . --import                                   # primeira vez (cache de classes)
-godot --headless --fixed-fps 60 --path . -s tests/unit_tests.gd      # 126 verificações
+godot --headless --fixed-fps 60 --path . -s tests/unit_tests.gd      # 126 verificações (núcleo)
+godot --headless --fixed-fps 60 --path . -s tests/unit_tests.gd -- res://tests/input_suite.gd   # teclado + toque
 godot --headless --path . -s tests/check_scripts.gd                  # compila todos os scripts/cenas
 godot --headless --fixed-fps 60 --path . -s tests/smoke_match.gd -- pikachu lucario
 godot --headless --fixed-fps 60 --path . -s tests/tournament.gd -- 2 2   # todos x todos (bots)

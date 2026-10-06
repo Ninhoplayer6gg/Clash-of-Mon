@@ -15,7 +15,7 @@ enum State { IDLE, CASTING, DASHING, HITSTUN, DISABLED, FAINTED }
 const SLOTS := ["basic", "skill1", "skill2", "skill3", "ult"]
 const LAYER_WORLD := 1
 const LAYER_FIGHTERS := 2
-const BUFFER_TIME := 0.22
+const BUFFER_TIME := 0.3
 
 static var _flash_shader: Shader
 
@@ -414,7 +414,7 @@ func try_cast(slot: String, aim_vec: Vector2, strength: float, from_buffer: bool
 	var ab := ability(slot)
 	if ab == null:
 		return false
-	if state == State.CASTING and cast and cast.can_dash_cancel() and slot == "basic":
+	if state == State.CASTING and cast and cast.can_skill_cancel() and cooldowns.get(slot, 0.0) <= 0.0:
 		_end_cast(false)
 	if not can_act():
 		return false
@@ -489,6 +489,8 @@ func _start_cast(ab: AbilityDef, slot: String, dir: Vector2, point: Vector2, st:
 	c.channel_aim = bool(st.get("channel_aim", false))
 	c.cancel_after = float(st.get("cancel_after", c.hit_time + 0.05))
 	for a in st.get("actions", []):
+		if a.get("bound", false) or (a.get("do", "") == "beam" and a.get("bound", true)):
+			c.channel = true
 		var at = a.get("at", 0.0)
 		var t := 0.0
 		if at is String:

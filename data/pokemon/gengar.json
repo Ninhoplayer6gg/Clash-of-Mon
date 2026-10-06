@@ -14,7 +14,7 @@
 			"portrait": "res://assets/pmd/portrait/0094/Normal.png",
 			"types": ["ghost", "poison"],
 			"stats": {
-				"hp": 2900, "attack": 90, "defense": 80, "sp_attack": 130, "sp_defense": 88,
+				"hp": 3000, "attack": 90, "defense": 80, "sp_attack": 130, "sp_defense": 88,
 				"move_speed": 132, "mass": 0.9, "radius": 9, "energy": 100, "energy_regen": 25
 			},
 			"anim_map": {"lick": ["Lick", "Shoot"], "spin": ["Twirl", "Rotate"]},
@@ -42,7 +42,7 @@
 					"id": "shadow_ball", "name": "Shadow Ball", "icon": "SB",
 					"description": "Esfera sombria que acelera e deixa o alvo Vulnerável (+12% de dano recebido por 3s).",
 					"type": "ghost", "category": "special",
-					"cooldown": 5.0, "energy": 20, "range": 260, "aim": "direction",
+					"cooldown": 4.5, "energy": 20, "range": 260, "aim": "direction",
 					"anim": "shoot", "anim_speed": 1.4, "cast_time": 0.42, "move_mult": 0.15, "sfx": "shadow",
 					"ai": {"max": 250, "use": "poke"},
 					"actions": [
@@ -87,7 +87,7 @@
 					"actions": [
 						{"at": 0.0, "do": "vanish", "duration": 1.0, "color": "#5b3a8a"},
 						{"at": 0.62, "do": "aoe", "where": "self", "follow": true, "delay": 0.38, "radius": 48, "duration": 0.12,
-						 "power": 700, "knockback": 260, "kb_dir": "away", "hitstun": 0.28, "sfx": "blast",
+						 "power": 760, "knockback": 260, "kb_dir": "away", "hitstun": 0.28, "sfx": "blast",
 						 "status": {"id": "vulnerable", "chance": 1.0},
 						 "vfx": {"style": "burst", "color": "#8a4fd6", "fade": 0.3}}
 					]
