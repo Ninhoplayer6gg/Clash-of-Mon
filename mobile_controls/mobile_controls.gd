@@ -302,9 +302,16 @@ func _draw_button(b: Dictionary, op: float) -> void:
 	draw_arc(c, r, 0, TAU, 40, ring if ready else Color(0.6, 0.6, 0.6, 0.5 * op), 2.5)
 	var fs := int(r * 0.62)
 	var col := Color(1, 1, 1, op) if ready else Color(0.7, 0.7, 0.7, 0.6 * op)
-	var sz := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, fs)
-	draw_string_outline(_font, c + Vector2(-sz.x * 0.5, fs * 0.36), label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 4, Color(0, 0, 0, 0.8 * op))
-	draw_string(_font, c + Vector2(-sz.x * 0.5, fs * 0.36), label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+	# v0.2 polish: procedural skill icon tinted by move type (text = fallback).
+	var shape := _icon_shape(slot, ab)
+	if shape != "":
+		var ic := Color(0.75, 0.97, 1.0) if slot == "dash" else SkillIcons.icon_color(ab.move_type)
+		ic = Color(ic, op) if ready else Color(ic.lerp(Color(0.55, 0.55, 0.58), 0.65), 0.7 * op)
+		SkillIcons.draw_icon(self, shape, c, r * (0.98 if slot == "basic" else 1.12), ic)
+	else:
+		var sz := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, fs)
+		draw_string_outline(_font, c + Vector2(-sz.x * 0.5, fs * 0.36), label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 4, Color(0, 0, 0, 0.8 * op))
+		draw_string(_font, c + Vector2(-sz.x * 0.5, fs * 0.36), label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 	if ab and slot != "basic":
 		var secs: float = fighter.cooldowns.get(slot, 0.0)
 		if secs > 0.0:
@@ -323,6 +330,15 @@ func _draw_button(b: Dictionary, op: float) -> void:
 			draw_circle(c + lim, 10.0 * _scale, Color(1, 1, 1, 0.8 * op))
 			if lim.length() < DRAG_DEADZONE * _scale:
 				draw_string(_font, c + Vector2(-r, -r - 8.0), "cancelar", HORIZONTAL_ALIGNMENT_LEFT, -1, int(16 * _scale), Color(1, 0.6, 0.6, op))
+
+
+## v0.2 polish: icon shape for a button ("" = draw the text label).
+func _icon_shape(slot: String, ab: AbilityDef) -> String:
+	if slot == "dash":
+		return "dodge"
+	if ab == null or fighter == null:
+		return ""
+	return SkillIcons.shape_for(ab, fighter.form)
 
 
 func _draw_pie(c: Vector2, r: float, frac: float, col: Color) -> void:

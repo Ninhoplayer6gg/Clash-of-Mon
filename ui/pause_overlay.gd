@@ -7,7 +7,8 @@ var match_node: Node
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Offsets too: a fresh Control has a zero rect that set_anchors_preset keeps.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = UITheme.get_theme()
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.6)
@@ -30,6 +31,9 @@ func _ready() -> void:
 	var restart := UITheme.make_button("Reiniciar luta")
 	restart.pressed.connect(func(): match_node.restart())
 	box.add_child(restart)
+	var how := UITheme.make_button("Como jogar")
+	how.pressed.connect(func(): match_node.show_tutorial(true))
+	box.add_child(how)
 	var hit := CheckButton.new()
 	hit.text = "Mostrar hitboxes"
 	hit.button_pressed = Settings.show_hitboxes

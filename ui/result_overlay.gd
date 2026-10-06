@@ -11,7 +11,8 @@ var _rematch: Button
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Offsets too: a fresh Control has a zero rect that set_anchors_preset keeps.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = UITheme.get_theme()
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.65)

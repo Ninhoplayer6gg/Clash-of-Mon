@@ -42,6 +42,7 @@ func _ready() -> void:
 	_option(a, "Qualidade gráfica", ["Baixa", "Média", "Alta"], Settings.quality,
 		func(i): Settings.set_value("quality", i))
 	_check(a, "Tremor de tela", "screen_shake")
+	_check(a, "Hit-stop (pausa no impacto e câmera lenta no nocaute)", "hit_stop")
 	_check(a, "Números de dano", "damage_numbers")
 	_check(a, "Mostrar FPS", "show_fps")
 	_check(a, "Modo debug (F3)", "debug_overlay")
@@ -56,9 +57,20 @@ func _ready() -> void:
 	_check(b, "Mira assistida (toque rápido)", "aim_assist")
 	_check(b, "Vibração", "vibration")
 	_slider(b, "Volume", 0.0, 1.0, Settings.sfx_volume, func(v): Settings.set_value("sfx_volume", v))
+	var tut := UITheme.make_button("Ver tutorial", Vector2(240, 54), 22)
+	tut.pressed.connect(_open_tutorial)
+	b.add_child(tut)
 	var help := UITheme.make_label("Teclado: WASD move • mouse mira • J/clique ataque • K L U skills • I/R ultimate • Espaço dash • Q/E troca • M mega • Esc pausa\nGamepad: analógico esq. move • dir. mira • A ataque • X Y B skills • RB ultimate • LB/LT dash • D-pad troca", 14, UITheme.MUTED)
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.add_child(help)
+
+
+## v0.2 polish: "Como jogar" overlay on top of this screen.
+func _open_tutorial() -> void:
+	var t := TutorialOverlay.new()
+	add_child(t)
+	t.open(Settings.use_touch_controls())
+	t.closed.connect(t.queue_free)
 
 
 func _option(parent: Control, label: String, items: Array, selected: int, cb: Callable) -> void:
