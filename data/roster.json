@@ -1,5 +1,5 @@
 {
 	"_comment": "Índice de conteúdo carregado pelo GameData. Ordem = ordem nas telas de seleção.",
 	"pokemon": ["pikachu", "lucario", "charizard", "blastoise", "gengar", "garchomp"],
-	"arenas": ["verdant_glade", "stone_ruins"]
+	"arenas": ["verdant_glade", "stone_ruins", "volcano_crater", "tropical_lagoon"]
 }

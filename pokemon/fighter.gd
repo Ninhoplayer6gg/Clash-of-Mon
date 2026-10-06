@@ -99,6 +99,13 @@ var mega_enabled := false
 var damage_dealt := 0
 var damage_taken := 0
 
+# Terrain (v0.2): written every physics tick by ArenaTerrain.
+var terrain_kind := 0          # ArenaTerrain.NONE / GRASS / LAVA / WATER under the feet
+var terrain_speed_mult := 1.0  # shallow water slow / boost
+var concealed := false         # hidden in tall grass from the enemy team
+var reveal_time := 0.0         # > 0: revealed after attacking or losing HP
+var terrain_alpha := 1.0       # concealment fade as seen by the local player
+
 
 func setup(p_species: PokemonDef, p_team: int, p_world: CombatWorld, form_id: String = "") -> void:
 	species = p_species
@@ -375,6 +382,7 @@ func _integrate_movement(delta: float) -> void:
 	var decel: float = GameData.cfg("movement", "deceleration", 2400.0)
 	var target := Vector2.ZERO
 	var spd := move_speed * status.speed_mult()
+	spd *= terrain_speed_mult  # terrain (v0.2): shallow water
 	match state:
 		State.IDLE:
 			target = input.move.limit_length(1.0) * spd
@@ -838,7 +846,10 @@ func _process(delta: float) -> void:
 			animator.position.y = -sin(t * PI) * 26.0
 	if invuln > 0.0 and state != State.DASHING and hidden_mode == "" and int(Time.get_ticks_msec() / 60) % 2 == 0:
 		alpha *= 0.6
-	animator.modulate = Color(tint.r, tint.g, tint.b, alpha)
+	animator.modulate = Color(tint.r, tint.g, tint.b, alpha * terrain_alpha)
+	# Terrain (v0.2): concealed in tall grass also hides shadow + team ring.
+	if self_modulate.a != terrain_alpha:
+		self_modulate.a = terrain_alpha
 	if afterimage_time > 0.0:
 		afterimage_time -= delta
 		_afterimage_acc += delta
@@ -853,7 +864,7 @@ func _process(delta: float) -> void:
 			if m.has("aura"):
 				pa = Color.from_string(String(m["aura"]), Color.WHITE)
 				break
-	if pa.a > 0.0 and Engine.get_process_frames() % 6 == 0 and hidden_mode == "":
+	if pa.a > 0.0 and Engine.get_process_frames() % 6 == 0 and hidden_mode == "" and terrain_alpha > 0.4:
 		world.vfx.burst(position + Vector2(randf_range(-radius, radius), -randf() * body_height), pa, 1, 18.0, 0.5, 2.0)
 
 

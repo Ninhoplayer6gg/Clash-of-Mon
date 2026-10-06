@@ -37,6 +37,12 @@ var _stuck_acc := 0.0
 var _switch_cd := 2.0
 ## Decision counters (debug overlay / balance tests).
 var stats := {}
+# Terrain (v0.2): vision vs tall grass, ambush and lava avoidance.
+var _last_seen_pos := Vector2.INF
+var _last_seen_frame := 0
+var _search_point := Vector2.INF
+var _ambush_until := 0
+var _ambush_block_until := 0
 
 
 func _ready() -> void:
@@ -74,6 +80,7 @@ func _physics_process(delta: float) -> void:
 	var move := _desired
 	if behavior == "active":
 		move = _dodge(move)
+	move = _avoid_hazards(move)  # terrain (v0.2): get out of lava
 	move = _unstick(move, delta)
 	inp.move = _steer(move)
 
@@ -82,6 +89,10 @@ func _physics_process(delta: float) -> void:
 
 func _decide(target: Fighter) -> void:
 	stats["decisions"] = stats.get("decisions", 0) + 1
+	# Terrain (v0.2): a target concealed in tall grass is hunted at its last
+	# known position; a concealed brawler may wait in ambush.
+	if _terrain_decide(target):
+		return
 	var to := target.position - fighter.position
 	var dist := to.length()
 	var dir := to / maxf(dist, 0.001)
@@ -242,11 +253,11 @@ func _steer(dir: Vector2) -> Vector2:
 		return dir
 	var arena := world.arena
 	var probe := fighter.radius + 14.0
-	if not arena.circle_blocked(fighter.position + dir * probe, fighter.radius):
+	if not _blocked(fighter.position + dir * probe):
 		return dir
 	for k in [0.5, -0.5, 1.0, -1.0, 1.5, -1.5]:
 		var d := dir.rotated(k * _strafe_sign)
-		if not arena.circle_blocked(fighter.position + d * probe, fighter.radius):
+		if not _blocked(fighter.position + d * probe):
 			return d
 	return dir.orthogonal() * _strafe_sign
 
@@ -266,3 +277,94 @@ func _unstick(move: Vector2, delta: float) -> Vector2:
 			_unstick_dir = move.orthogonal() * (1.0 if _rng.randf() < 0.5 else -1.0)
 	_last_pos = fighter.position
 	return move
+
+
+# ------------------------------------------------------- terrain (v0.2)
+
+## Vision + ambush. Returns true when the decision was taken here.
+func _terrain_decide(target: Fighter) -> bool:
+	if not world.can_see(fighter, target):
+		_hunt(target)
+		return true
+	_last_seen_pos = target.position
+	_last_seen_frame = Engine.get_physics_frames()
+	_search_point = Vector2.INF
+	return _ambush(target)
+
+
+## Goes to where the target vanished, sweeps that grass patch (anyone
+## within ArenaTerrain.REVEAL_RANGE is revealed) and pokes into it.
+func _hunt(target: Fighter) -> void:
+	stats["hunt"] = stats.get("hunt", 0) + 1
+	var terrain := world.arena.terrain
+	if _last_seen_pos == Vector2.INF:
+		_last_seen_pos = target.position  # never seen yet: it entered here
+		_last_seen_frame = Engine.get_physics_frames()
+	var me := fighter.position
+	var unseen := float(Engine.get_physics_frames() - _last_seen_frame) / float(Engine.physics_ticks_per_second)
+	if _search_point == Vector2.INF:
+		_search_point = _last_seen_pos
+	elif me.distance_to(_search_point) < 20.0 and terrain:
+		# Reached: try another cell of the patch (wider after a while).
+		_search_point = terrain.search_point(_last_seen_pos if unseen < 6.0 else me, _rng, 120.0 if unseen < 6.0 else 400.0)
+	var to := _search_point - me
+	var strafe := to.normalized().orthogonal() * _strafe_sign
+	_desired = (to.normalized() + strafe * 0.15).normalized() if to.length() > 4.0 else Vector2.ZERO
+	if behavior != "active" or unseen > 5.0 or _rng.randf() > 0.45:
+		return
+	# Blind fire into the grass where the target was last seen.
+	var aim_to := _last_seen_pos - me
+	var dist := aim_to.length()
+	for slot in ["basic", "skill1", "skill2", "skill3"]:
+		var ab := fighter.ability(slot)
+		if ab == null or not fighter.is_ready(slot):
+			continue
+		if slot != "basic" and String(ab.ai.get("use", "")) != "poke":
+			continue
+		if dist > float(ab.ai.get("max", ab.reach)) or ab.aim == "self":
+			continue
+		fighter.input.request_cast(slot, aim_to.normalized(), clampf(dist / maxf(ab.reach, 1.0), 0.1, 1.0))
+		stats["blind_" + slot] = stats.get("blind_" + slot, 0) + 1
+		return
+
+
+## Concealed brawlers hold still for a moment while the unaware target
+## walks in, then fight normally (bounded so matches never stall).
+func _ambush(target: Fighter) -> bool:
+	if behavior != "active" or not fighter.concealed or String(profile.get("style", "")) != "brawler":
+		_ambush_until = 0
+		return false
+	var now := Engine.get_physics_frames()
+	if now < _ambush_block_until:
+		return false
+	var dist := fighter.position.distance_to(target.position)
+	if dist < float(profile.get("range", 40.0)) + 70.0 or dist > 300.0 or now > _ambush_until and _ambush_until != 0:
+		if _ambush_until != 0:
+			_ambush_until = 0
+			_ambush_block_until = now + 8 * Engine.physics_ticks_per_second
+		return false
+	if _ambush_until == 0:
+		_ambush_until = now + int(2.5 * Engine.physics_ticks_per_second)
+	stats["ambush"] = stats.get("ambush", 0) + 1
+	_desired = Vector2.ZERO
+	return true
+
+
+## Out of lava as fast as possible (dash when available).
+func _avoid_hazards(move: Vector2) -> Vector2:
+	var terrain := world.arena.terrain
+	if terrain == null or fighter.terrain_kind != ArenaTerrain.LAVA or fighter.types.has("fire"):
+		return move
+	stats["lava_escape"] = stats.get("lava_escape", 0) + 1
+	var out := terrain.escape_dir(fighter.position, fighter.radius)
+	if behavior == "active" and fighter.state == Fighter.State.IDLE:
+		_maybe_dash(out, true)
+	return out
+
+
+## Steering probe: obstacles, plus lava for non-Fire types (ignored while
+## already standing in lava so the escape direction is not overridden).
+func _blocked(p: Vector2) -> bool:
+	if world.arena.circle_blocked(p, fighter.radius):
+		return true
+	return fighter.terrain_kind != ArenaTerrain.LAVA and world.arena.is_hazard(p, fighter)
