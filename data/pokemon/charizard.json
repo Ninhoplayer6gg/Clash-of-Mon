@@ -1,0 +1,104 @@
+{
+	"id": "charizard",
+	"name": "Charizard",
+	"dex": 6,
+	"role": "Atirador / Brigador",
+	"difficulty": 2,
+	"description": "Garras largas de perto e fogo de média distância. Flamethrower queima continuamente enquanto Charizard mira; Fire Blast deixa o chão em chamas. Fly salta sobre obstáculos e projéteis.",
+	"ai": {"range": 75, "style": "kite", "aggression": 0.65, "retreat_hp": 0.22},
+	"default_form": "base",
+	"forms": {
+		"base": {
+			"name": "Charizard",
+			"sprite": "res://assets/pmd/sprite/0006",
+			"portrait": "res://assets/pmd/portrait/0006/Normal.png",
+			"types": ["fire", "flying"],
+			"stats": {
+				"hp": 3500, "attack": 104, "defense": 86, "sp_attack": 118, "sp_defense": 90,
+				"move_speed": 124, "mass": 1.35, "radius": 11, "energy": 100, "energy_regen": 20
+			},
+			"passive": {
+				"id": "blaze",
+				"name": "Blaze",
+				"description": "Abaixo de 40% de HP, golpes de Fogo causam +25% de dano e as chamas de Charizard ficam mais intensas. Tipos Fogo são imunes a Queimadura.",
+				"params": {"threshold": 0.4, "bonus": 0.25}
+			},
+			"abilities": {
+				"basic": {
+					"id": "slash", "name": "Slash", "icon": "SL",
+					"description": "Golpe de garra em arco largo.",
+					"type": "normal", "category": "physical",
+					"cooldown": 0.42, "energy": 0, "range": 44, "aim": "direction",
+					"anim": "swing", "cast_time": 0.36, "move_mult": 0.25, "sfx": "swing",
+					"ai": {"max": 44},
+					"actions": [
+						{"at": "hit", "do": "melee", "shape": "sector", "radius": 36, "angle": 130, "offset": 2, "power": 170, "knockback": 90, "contact": true,
+						 "vfx": {"style": "slash", "color": "#ffb36b"}}
+					]
+				},
+				"skill1": {
+					"id": "flamethrower", "name": "Flamethrower", "icon": "FT",
+					"description": "Lança chamas em cone por 1s, atingindo várias vezes com chance de queimar. Pode andar devagar e girar a mira.",
+					"type": "fire", "category": "special",
+					"cooldown": 6.5, "energy": 25, "range": 88, "aim": "direction",
+					"anim": "shoot", "anim_loop": true, "cast_time": 1.0, "move_mult": 0.35, "channel_aim": true, "sfx": "fire",
+					"ai": {"max": 85, "use": "engage"},
+					"actions": [
+						{"at": 0.08, "do": "melee", "shape": "sector", "radius": 88, "angle": 46, "offset": 6, "duration": 0.9, "interval": 0.15, "hits": 6,
+						 "bound": true, "follow_aim": true, "power": 78, "knockback": 30, "kb_dir": "forward",
+						 "status": {"id": "burn", "chance": 0.22},
+						 "vfx": {"style": "cone", "color": "#ff7a2f"}}
+					]
+				},
+				"skill2": {
+					"id": "fire_blast", "name": "Fire Blast", "icon": "FB",
+					"description": "Bola de fogo que explode em uma grande área e deixa o chão em chamas por 2s.",
+					"type": "fire", "category": "special",
+					"cooldown": 8.0, "energy": 30, "range": 260, "aim": "direction",
+					"anim": "special", "cast_time": 0.45, "move_mult": 0.1, "sfx": "fire",
+					"ai": {"max": 250, "use": "poke"},
+					"actions": [
+						{"at": "hit", "do": "projectile", "speed": 250, "range": 260, "radius": 11, "power": 380, "knockback": 160, "explode_on_end": true,
+						 "status": {"id": "burn", "chance": 0.5},
+						 "explode": {"radius": 40, "power": 150, "knockback": 170, "duration": 0.1, "status": {"id": "burn", "chance": 0.5},
+						             "vfx": {"style": "burst", "color": "#ff7a2f"},
+						             "linger": {"radius": 34, "duration": 2.0, "interval": 0.5, "power": 45, "status": {"id": "burn", "chance": 0.35},
+						                        "ground": true, "vfx": {"style": "ground", "color": "#ff6a1f"}}},
+						 "vfx": {"style": "fire", "color": "#fff2a8", "color2": "#ff6a1f", "size": 11}}
+					]
+				},
+				"skill3": {
+					"id": "fly", "name": "Fly", "icon": "FL",
+					"description": "Voa até o ponto escolhido, intocável no ar e passando sobre obstáculos. Ao pousar, causa dano e empurra em área.",
+					"type": "flying", "category": "physical",
+					"cooldown": 6.0, "energy": 20, "range": 170, "aim": "point",
+					"anim": "hop", "cast_time": 0.55, "move_mult": 0.0,
+					"tags": ["mobility"],
+					"ai": {"max": 170, "use": "escape"},
+					"actions": [
+						{"at": 0.0, "do": "leap", "distance": 170, "duration": 0.5,
+						 "land": {"radius": 34, "power": 220, "knockback": 210, "kb_dir": "away", "duration": 0.1, "sfx": "hit_heavy",
+						          "vfx": {"style": "ring", "color": "#d9c7ff"}}}
+					]
+				},
+				"ult": {
+					"id": "blast_burn", "name": "Blast Burn", "icon": "BB",
+					"description": "ULTIMATE: explosão massiva ao redor de Charizard que queima e arremessa todos para longe, deixando uma área em chamas. Não pode ser interrompido.",
+					"type": "fire", "category": "special",
+					"cooldown": 1.0, "energy": 0, "range": 90, "aim": "self",
+					"anim": "charge", "cast_time": 0.8, "move_mult": 0.0, "super_armor": true, "sfx": "charge",
+					"ai": {"max": 85, "use": "finisher"},
+					"actions": [
+						{"at": 0.0, "do": "vfx", "style": "ring", "color": "#ff7a2f", "radius": 40},
+						{"at": 0.0, "do": "aoe", "where": "self", "delay": 0.42, "radius": 92, "duration": 0.14, "power": 720, "knockback": 380, "kb_dir": "away", "hitstun": 0.3,
+						 "status": {"id": "burn", "chance": 1.0}, "sfx": "blast",
+						 "vfx": {"style": "burst", "color": "#ff6a1f", "fade": 0.3}},
+						{"at": 0.45, "do": "zone", "where": "self", "radius": 70, "duration": 3.0, "interval": 0.5, "power": 50, "ground": true,
+						 "status": {"id": "burn", "chance": 0.3}, "vfx": {"style": "ground", "color": "#ff6a1f"}},
+						{"at": 0.45, "do": "shake", "amount": 6.0, "time": 0.3}
+					]
+				}
+			}
+		}
+	}
+}

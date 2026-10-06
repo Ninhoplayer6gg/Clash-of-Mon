@@ -1,0 +1,103 @@
+{
+	"id": "blastoise",
+	"name": "Blastoise",
+	"dex": 9,
+	"role": "Tanque / Atirador",
+	"difficulty": 1,
+	"description": "Muito resistente e difícil de empurrar. Controla o espaço com jatos d'água de longo alcance, congela com Ice Beam e gira dentro do casco para escapar ou atropelar.",
+	"ai": {"range": 150, "style": "kite", "aggression": 0.5, "retreat_hp": 0.15},
+	"default_form": "base",
+	"forms": {
+		"base": {
+			"name": "Blastoise",
+			"sprite": "res://assets/pmd/sprite/0009",
+			"portrait": "res://assets/pmd/portrait/0009/Normal.png",
+			"types": ["water"],
+			"stats": {
+				"hp": 4300, "attack": 92, "defense": 120, "sp_attack": 102, "sp_defense": 112,
+				"move_speed": 108, "mass": 1.8, "radius": 12, "energy": 100, "energy_regen": 19
+			},
+			"anim_map": {"shell": ["Withdraw"], "spin": ["Rotate", "Ricochet"]},
+			"dash": {"distance": 66, "energy_cost": 32},
+			"passive": {
+				"id": "shell_armor",
+				"name": "Shell Armor",
+				"description": "Recebe 20% menos dano de ataques que vêm pela frente e sofre 40% menos empurrão.",
+				"params": {"front_reduction": 0.2, "front_angle": 75, "knockback_mult": 0.6}
+			},
+			"abilities": {
+				"basic": {
+					"id": "water_gun", "name": "Water Gun", "icon": "WG",
+					"description": "Dois jatos rápidos dos canhões.",
+					"type": "water", "category": "special",
+					"cooldown": 0.5, "energy": 0, "range": 195, "aim": "direction",
+					"anim": "shoot", "cast_time": 0.3, "move_mult": 0.45, "sfx": "water",
+					"ai": {"max": 190},
+					"actions": [
+						{"at": "hit", "do": "projectile", "speed": 400, "range": 195, "radius": 5, "power": 72, "knockback": 50,
+						 "vfx": {"style": "water", "color": "#e8f6ff", "color2": "#4aa3ff", "size": 5}},
+						{"at": 0.17, "do": "projectile", "speed": 400, "range": 195, "radius": 5, "power": 72, "knockback": 50,
+						 "vfx": {"style": "water", "color": "#e8f6ff", "color2": "#4aa3ff", "size": 5}}
+					]
+				},
+				"skill1": {
+					"id": "hydro_pump", "name": "Hydro Pump", "icon": "HP",
+					"description": "Após carregar, dispara um jato longo que acerta duas vezes e empurra muito.",
+					"type": "water", "category": "special",
+					"cooldown": 6.5, "energy": 25, "range": 260, "aim": "direction",
+					"anim": "shoot", "anim_loop": true, "cast_time": 0.8, "move_mult": 0.0, "sfx": "water",
+					"ai": {"max": 250, "use": "poke"},
+					"actions": [
+						{"at": 0.0, "do": "beam", "length": 260, "width": 10, "delay": 0.34, "duration": 0.36, "hits": 2, "interval": 0.16,
+						 "power": 250, "knockback": 260, "hitstun": 0.2, "kb_dir": "forward", "sfx": "water",
+						 "vfx": {"style": "beam", "color": "#4aa3ff"}}
+					]
+				},
+				"skill2": {
+					"id": "ice_beam", "name": "Ice Beam", "icon": "IB",
+					"description": "Raio congelante rápido. Congela o alvo por um instante (com imunidade temporária depois).",
+					"type": "ice", "category": "special",
+					"cooldown": 9.0, "energy": 28, "range": 220, "aim": "direction",
+					"anim": "charge", "cast_time": 0.42, "move_mult": 0.0, "sfx": "zap_big",
+					"ai": {"max": 210, "use": "poke"},
+					"actions": [
+						{"at": 0.0, "do": "beam", "length": 220, "width": 5, "delay": 0.16, "duration": 0.12,
+						 "power": 240, "knockback": 30,
+						 "status": {"id": "freeze", "chance": 1.0},
+						 "vfx": {"style": "beam", "color": "#9fe8ff"}}
+					]
+				},
+				"skill3": {
+					"id": "rapid_spin", "name": "Rapid Spin", "icon": "RS",
+					"description": "Gira dentro do casco avançando: recebe metade do dano, não é empurrado, limpa Queimadura/Veneno/Paralisia e atropela quem estiver no caminho.",
+					"type": "normal", "category": "physical",
+					"cooldown": 6.0, "energy": 22, "range": 125, "aim": "direction",
+					"anim": "spin", "anim_loop": true, "cast_time": 0.42, "move_mult": 0.0,
+					"tags": ["mobility"],
+					"ai": {"max": 130, "use": "escape"},
+					"actions": [
+						{"at": 0.0, "do": "cleanse", "ids": ["burn", "poison", "paralysis", "slow"]},
+						{"at": 0.0, "do": "buff", "id": "rapid_spin", "duration": 0.45, "mods": {"damage_taken_mult": 0.5, "knockback_mult": 0.0}},
+						{"at": 0.0, "do": "dash", "distance": 125, "duration": 0.38,
+						 "hit": {"shape": "circle", "radius": 16, "power": 170, "knockback": 230, "kb_dir": "away", "hits": 1, "contact": true,
+						         "vfx": {"style": "none", "color": "#ffffff"}}}
+					]
+				},
+				"ult": {
+					"id": "hydro_cannon", "name": "Hydro Cannon", "icon": "HC",
+					"description": "ULTIMATE: canhões disparam uma torrente gigante que atravessa a arena, acerta 3 vezes e arrasta o alvo para longe.",
+					"type": "water", "category": "special",
+					"cooldown": 1.0, "energy": 0, "range": 330, "aim": "direction",
+					"anim": "shoot", "anim_loop": true, "cast_time": 1.05, "move_mult": 0.0, "super_armor": true, "sfx": "charge",
+					"ai": {"max": 320, "use": "finisher"},
+					"actions": [
+						{"at": 0.0, "do": "beam", "length": 330, "width": 20, "delay": 0.45, "duration": 0.5, "hits": 3, "interval": 0.16,
+						 "power": 320, "knockback": 300, "hitstun": 0.22, "kb_dir": "forward", "sfx": "blast",
+						 "vfx": {"style": "beam", "color": "#2f8fff"}},
+						{"at": 0.45, "do": "shake", "amount": 5.0, "time": 0.4}
+					]
+				}
+			}
+		}
+	}
+}

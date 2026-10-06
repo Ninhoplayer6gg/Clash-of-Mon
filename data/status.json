@@ -1,0 +1,32 @@
+{
+	"_comment": "Efeitos de status adaptados para combate em tempo real. Duração em segundos. Controle total (freeze/sleep) é curto e gera imunidade temporária para evitar frustração.",
+	"burn": {
+		"name": "Queimadura", "short": "QMD", "color": "#ff7a2f",
+		"duration": 3.0, "tick": 0.5, "dps_max_hp_pct": 0.016,
+		"physical_damage_mult": 0.85
+	},
+	"poison": {
+		"name": "Veneno", "short": "VEN", "color": "#b45bd6",
+		"duration": 4.0, "tick": 0.5, "dps_max_hp_pct": 0.011, "max_stacks": 3
+	},
+	"paralysis": {
+		"name": "Paralisia", "short": "PAR", "color": "#ffe14a",
+		"duration": 1.6, "speed_mult": 0.65, "attack_speed_mult": 0.85, "jolt_stun": 0.18
+	},
+	"freeze": {
+		"name": "Congelado", "short": "CGL", "color": "#9fe8ff",
+		"duration": 0.75, "break_on_hit": true, "break_bonus_damage": 1.2, "immunity": 4.5
+	},
+	"sleep": {
+		"name": "Sono", "short": "SNO", "color": "#a6a6ff",
+		"duration": 1.3, "break_on_hit": true, "immunity": 6.0
+	},
+	"slow": {
+		"name": "Lentidão", "short": "LNT", "color": "#c9a46a",
+		"duration": 1.5, "speed_mult": 0.7
+	},
+	"vulnerable": {
+		"name": "Vulnerável", "short": "VUL", "color": "#8e6bd6",
+		"duration": 3.0, "damage_taken_mult": 1.12
+	}
+}

@@ -1,0 +1,123 @@
+{
+	"id": "lucario",
+	"name": "Lucario",
+	"dex": 448,
+	"role": "Lutador Híbrido",
+	"difficulty": 2,
+	"description": "Combos corpo a corpo fortes e um projétil teleguiado devastador. Fica mais perigoso quanto menos HP tiver: a Aura amplifica todo o seu dano.",
+	"ai": {"range": 40, "style": "brawler", "aggression": 0.75, "retreat_hp": 0.18},
+	"default_form": "base",
+	"forms": {
+		"base": {
+			"name": "Lucario",
+			"sprite": "res://assets/pmd/sprite/0448",
+			"portrait": "res://assets/pmd/portrait/0448/Normal.png",
+			"types": ["fighting", "steel"],
+			"stats": {
+				"hp": 3200, "attack": 112, "defense": 88, "sp_attack": 110, "sp_defense": 80,
+				"move_speed": 128, "mass": 1.0, "radius": 9, "energy": 100, "energy_regen": 20
+			},
+			"anim_map": {"special": ["Charge", "SpAttack"]},
+			"passive": {
+				"id": "aura",
+				"name": "Aura",
+				"description": "Lucario causa até 35% a mais de dano conforme perde HP. A aura azul fica mais intensa.",
+				"params": {"max_bonus": 0.35}
+			},
+			"abilities": {
+				"basic": {
+					"id": "aura_combo", "name": "Aura Combo", "icon": "AC",
+					"description": "Sequência de 3 golpes. O terceiro empurra.",
+					"type": "fighting", "category": "physical",
+					"cooldown": 0.3, "energy": 0, "range": 46, "aim": "direction",
+					"anim": "attack", "cast_time": 0.28, "move_mult": 0.25,
+					"combo_window": 0.8,
+					"ai": {"max": 46},
+					"combo": [
+						{"anim": "attack", "cast_time": 0.27, "move_mult": 0.3, "sfx": "swing",
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 28, "angle": 110, "offset": 3, "power": 125, "knockback": 60, "contact": true,
+						              "vfx": {"style": "slash", "color": "#8fd3ff"}}]},
+						{"anim": "strike", "cast_time": 0.27, "move_mult": 0.3, "sfx": "swing",
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 28, "angle": 110, "offset": 3, "power": 135, "knockback": 70, "contact": true,
+						              "vfx": {"style": "slash", "color": "#8fd3ff"}}]},
+						{"anim": "swing", "cast_time": 0.38, "move_mult": 0.15, "sfx": "swing",
+						 "actions": [{"at": "hit", "do": "melee", "shape": "sector", "radius": 32, "angle": 140, "offset": 3, "power": 215, "knockback": 230, "hitstun": 0.18, "contact": true,
+						              "vfx": {"style": "slash", "color": "#4fb4ff"}}]}
+					]
+				},
+				"skill1": {
+					"id": "force_palm", "name": "Force Palm", "icon": "FP",
+					"description": "Avança e golpeia com a palma: grande empurrão e chance de paralisar.",
+					"type": "fighting", "category": "physical",
+					"cooldown": 5.0, "energy": 20, "range": 50, "aim": "direction",
+					"anim": "strike", "cast_time": 0.42, "move_mult": 0.0, "sfx": "swing",
+					"ai": {"max": 55, "use": "engage"},
+					"actions": [
+						{"at": 0.0, "do": "dash", "distance": 26, "duration": 0.1, "afterimages": false},
+						{"at": "hit", "do": "melee", "shape": "circle", "offset": 18, "radius": 17, "power": 380, "knockback": 340, "hitstun": 0.26, "contact": true,
+						 "status": {"id": "paralysis", "chance": 0.35}, "sfx": "hit_heavy",
+						 "vfx": {"style": "burst", "color": "#ffd27a"}}
+					]
+				},
+				"skill2": {
+					"id": "bone_rush", "name": "Bone Rush", "icon": "BR",
+					"description": "Gira um osso de aura ao redor do corpo por quase 1s, acertando várias vezes. Pode andar e mirar enquanto gira.",
+					"type": "ground", "category": "physical",
+					"cooldown": 7.5, "energy": 25, "range": 34, "aim": "self",
+					"anim": "spin", "anim_loop": true, "cast_time": 0.95, "move_mult": 0.55, "channel_aim": true, "sfx": "spin",
+					"ai": {"max": 40, "use": "engage"},
+					"actions": [
+						{"at": 0.05, "do": "melee", "shape": "circle", "radius": 31, "offset": 0, "duration": 0.85, "interval": 0.17, "hits": 5, "bound": true,
+						 "power": 95, "knockback": 55, "contact": true,
+						 "vfx": {"style": "spin", "color": "#e3d6b0"}}
+					]
+				},
+				"skill3": {
+					"id": "extreme_speed", "name": "Extreme Speed", "icon": "ES",
+					"description": "Investida extremamente rápida e longa, invulnerável durante o movimento.",
+					"type": "normal", "category": "physical",
+					"cooldown": 4.2, "energy": 15, "range": 150, "aim": "direction",
+					"anim": "quick", "cast_time": 0.2, "move_mult": 0.0,
+					"tags": ["mobility"],
+					"ai": {"max": 160, "use": "engage"},
+					"actions": [
+						{"at": 0.0, "do": "dash", "distance": 150, "duration": 0.14, "invulnerable": 0.14,
+						 "hit": {"shape": "circle", "radius": 13, "power": 190, "knockback": 110, "hitstun": 0.14, "contact": true,
+						         "vfx": {"style": "none", "color": "#ffffff"}}}
+					]
+				},
+				"ult": {
+					"id": "aura_sphere", "name": "Aura Sphere", "icon": "AS",
+					"description": "ULTIMATE: concentra a aura e dispara uma esfera teleguiada enorme que explode. Lucario não pode ser interrompido enquanto carrega.",
+					"type": "fighting", "category": "special",
+					"cooldown": 1.0, "energy": 0, "range": 380, "aim": "direction",
+					"anim": "special", "cast_time": 0.6, "move_mult": 0.0, "super_armor": true, "sfx": "charge",
+					"ai": {"max": 320, "use": "finisher"},
+					"actions": [
+						{"at": 0.0, "do": "vfx", "style": "ring", "color": "#4fb4ff", "radius": 26},
+						{"at": 0.38, "do": "projectile", "speed": 240, "accel": 300, "max_speed": 540, "radius": 13, "range": 380, "homing": 130,
+						 "power": 660, "knockback": 300, "hitstun": 0.3, "sfx": "blast",
+						 "explode": {"radius": 40, "power": 180, "knockback": 200, "duration": 0.1, "vfx": {"style": "burst", "color": "#6ac8ff"}},
+						 "vfx": {"style": "orb", "color": "#e8f8ff", "color2": "#3fa8ff", "size": 12}}
+					]
+				}
+			}
+		},
+		"mega": {
+			"inherits": "base",
+			"name": "Mega Lucario",
+			"trigger": "mega",
+			"transform_duration": 25.0,
+			"sprite": "res://assets/pmd/sprite/0448/0001",
+			"portrait": "res://assets/pmd/portrait/0448/0001/Normal.png",
+			"asset_status": "approved",
+			"stat_mult": {"attack": 1.15, "sp_attack": 1.2, "move_speed": 1.06, "defense": 1.05},
+			"passive": {
+				"id": "aura",
+				"name": "Aura Adaptável",
+				"description": "Mega Lucario: a Aura chega a +50% e golpes do próprio tipo causam +15%.",
+				"params": {"max_bonus": 0.5, "stab_bonus": 0.15}
+			}
+		}
+	}
+}

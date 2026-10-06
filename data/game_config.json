@@ -1,0 +1,51 @@
+{
+	"_comment": "Parâmetros globais de combate. Valores em pixels de mundo, segundos e pontos.",
+	"movement": {
+		"acceleration": 1900.0,
+		"deceleration": 2400.0,
+		"knockback_friction": 7.5,
+		"cast_turn_speed": 14.0
+	},
+	"dash": {
+		"distance": 78.0,
+		"duration": 0.16,
+		"energy_cost": 30.0,
+		"cooldown": 0.55,
+		"invulnerable_time": 0.14
+	},
+	"energy": {
+		"regen_delay": 0.45
+	},
+	"damage": {
+		"stat_exponent": 0.6,
+		"hitstun_min": 0.08,
+		"hitstun_max": 0.4,
+		"invuln_after_heavy": 0.0
+	},
+	"ultimate": {
+		"charge_per_damage_dealt": 1.25,
+		"charge_per_damage_taken": 0.45,
+		"passive_charge_per_second": 0.6
+	},
+	"mega": {
+		"charge_per_damage_dealt": 0.9,
+		"charge_per_damage_taken": 0.6,
+		"default_duration": 25.0
+	},
+	"switching": {
+		"cooldown": 6.0,
+		"swap_time": 0.35,
+		"enter_invulnerable": 0.6,
+		"faint_choose_time": 3.0
+	},
+	"match": {
+		"time_limit_1v1": 120.0,
+		"time_limit_3v3": 210.0,
+		"intro_time": 1.6,
+		"end_delay": 1.6
+	},
+	"aim": {
+		"auto_aim_range_bonus": 1.2,
+		"projectile_lead": 0.6
+	}
+}
