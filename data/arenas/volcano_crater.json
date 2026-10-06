@@ -1,0 +1,47 @@
+{
+	"id": "volcano_crater",
+	"name": "Cratera Vulcânica",
+	"description": "O fundo de um vulcão ativo: rios e poças de lava, muros de basalto e cinzas. A lava queima quem não é do tipo Fogo.",
+	"size": [1100, 740],
+	"seed": 33,
+	"mirror": "x",
+	"palette": {
+		"grass": "#3b3437", "grass_dark": "#2f292c", "grass_light": "#463e41",
+		"dirt": "#5f5753", "dirt_dark": "#4f4844", "border": "#140f10",
+		"rock": "#6b6064", "wall": "#4a4144", "water": "#3d7fc4",
+		"trunk": "#4a3a30", "leaves": "#5a4f4a",
+		"lava": "#ff6a1a", "lava_dark": "#c4300e", "lava_light": "#ffd04a", "crust": "#2b1b18",
+		"cracks": "#e8641f", "ash": "#2a2624", "ash_light": "#5a5250"
+	},
+	"spawns": [[300, 370], [800, 370]],
+	"paths": [],
+	"decor": {"flowers": 0.0, "tufts": 0.035},
+	"terrain": [
+		{"kind": "ash", "circle": [130, 370, 66]},
+		{"kind": "ash", "circle": [550, 106, 80], "no_mirror": true},
+		{"kind": "ash", "circle": [550, 634, 80], "no_mirror": true},
+		{"kind": "ash", "circle": [300, 116, 44]},
+		{"kind": "ash", "circle": [300, 624, 44]},
+		{"kind": "ash", "circle": [460, 370, 34]},
+		{"kind": "lava", "circle": [550, 370, 56], "no_mirror": true},
+		{"kind": "lava", "line": [[382, -14], [398, 66], [452, 118]], "width": 30},
+		{"kind": "lava", "line": [[382, 754], [398, 674], [452, 622]], "width": 30},
+		{"kind": "lava", "circle": [205, 182, 32]},
+		{"kind": "lava", "circle": [205, 558, 32]},
+		{"kind": "lava", "line": [[-10, 236], [40, 252], [70, 290]], "width": 18},
+		{"kind": "lava", "line": [[-10, 504], [40, 488], [70, 450]], "width": 18}
+	],
+	"obstacles": [
+		{"kind": "wall", "rect": [366, 250, 24, 80], "style": "basalt"},
+		{"kind": "wall", "rect": [366, 410, 24, 80], "style": "basalt"},
+		{"kind": "wall", "rect": [128, 246, 76, 20], "style": "basalt"},
+		{"kind": "wall", "rect": [128, 474, 76, 20], "style": "basalt"},
+		{"kind": "rock", "pos": [300, 236], "radius": 14},
+		{"kind": "rock", "pos": [296, 506], "radius": 12},
+		{"kind": "rock", "pos": [462, 290], "radius": 11},
+		{"kind": "rock", "pos": [466, 452], "radius": 12},
+		{"kind": "rock", "pos": [550, 222], "radius": 16, "no_mirror": true},
+		{"kind": "rock", "pos": [550, 518], "radius": 15, "no_mirror": true}
+	],
+	"bushes": []
+}

@@ -18,6 +18,8 @@ var spawns: Array[Vector2] = []
 var obstacles: Array = []  # {kind, shape, pos, radius, rect, blocks_proj, blocks_move, hp, node, body}
 var ground: TileMapLayer
 var actors: Node2D
+## Interactive terrain (v0.2): tall grass, lava, shallow water.
+var terrain: ArenaTerrain
 var _tile_names: Array = []
 
 
@@ -53,6 +55,7 @@ func build(arena_data: Dictionary, actors_parent: Node2D) -> void:
 	for b in data.get("bushes", []):
 		_add_bush(Vector2(b[0], b[1]), variant)
 		variant += 1
+	_build_terrain()
 
 
 # ------------------------------------------------------------------ build
@@ -185,7 +188,10 @@ func _add_obstacle(o: Dictionary, variant: int) -> void:
 			var shape := RectangleShape2D.new()
 			shape.size = rect.size
 			cs.shape = shape
-			sprite.texture = ArenaArt.wall(palette, int(rect.size.x), int(rect.size.y))
+			if String(o.get("style", "")) == "basalt":
+				sprite.texture = ArenaArt.basalt_wall(palette, int(rect.size.x), int(rect.size.y))
+			else:
+				sprite.texture = ArenaArt.wall(palette, int(rect.size.x), int(rect.size.y))
 			sprite.centered = false
 			# Origin at the wall's bottom edge so y-sort works.
 			sprite.position = Vector2(-rect.size.x * 0.5, -rect.size.y - 6.0)
@@ -215,6 +221,10 @@ func _add_obstacle(o: Dictionary, variant: int) -> void:
 				"stump":
 					sprite.texture = ArenaArt.stump(palette)
 					sprite.offset = Vector2(0, -5)
+				"palm":
+					sprite.texture = ArenaArt.palm(palette, variant % 2)
+					sprite.offset = Vector2(0, -33)
+					ob["canopy"] = true
 				"pond":
 					sprite.texture = ArenaArt.pond(palette, int(radius))
 					sprite.z_index = -5
@@ -236,6 +246,7 @@ func _default_radius(kind: String) -> float:
 	match kind:
 		"tree": return 11.0
 		"stump": return 9.0
+		"palm": return 9.0
 		"pond": return 34.0
 	return 14.0
 
@@ -247,6 +258,38 @@ func _add_bush(p: Vector2, variant: int) -> void:
 	s.offset = Vector2(0, -6)
 	s.position = p
 	actors.add_child(s)
+
+
+# ---------------------------------------------------------- terrain (v0.2)
+# Data key "terrain" (see arena/arena_terrain.gd). Terrain never blocks
+# movement or projectiles; it changes speed, deals damage or conceals.
+
+func _build_terrain() -> void:
+	terrain = ArenaTerrain.new()
+	add_child(terrain)
+	terrain.build(self, data, actors)
+
+
+## Terrain kind under a point (ArenaTerrain.NONE / GRASS / LAVA / WATER).
+func terrain_at(p: Vector2) -> int:
+	return terrain.terrain_at(p) if terrain else ArenaTerrain.NONE
+
+
+## True where standing hurts `f` (lava for non-Fire types).
+func is_hazard(p: Vector2, f: Fighter = null) -> bool:
+	return terrain != null and terrain.is_hazard(p, f)
+
+
+## Fire hook (CombatWorld): fire-type hits, zones and explosions burn tall
+## grass. Returns true when a patch ignited.
+func on_fire_at(p: Vector2, radius: float) -> bool:
+	return terrain != null and terrain.on_fire_at(p, radius)
+
+
+## Per physics tick from the match: terrain effects + concealment.
+func update_terrain(world: CombatWorld, delta: float, hazards: bool = true) -> void:
+	if terrain:
+		terrain.update(world, delta, hazards)
 
 
 # ---------------------------------------------------------------- queries

@@ -249,6 +249,7 @@ func _physics_process(delta: float) -> void:
 				if time_left <= 0.0:
 					time_left = 0.0
 					_on_time_up()
+	arena.update_terrain(world, delta, phase == Phase.FIGHT)  # terrain (v0.2): lava, water, tall grass
 	arena.update_canopies([teams[0].active_fighter()] if teams[0].active_fighter() else [])
 
 

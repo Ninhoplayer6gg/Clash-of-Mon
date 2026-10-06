@@ -1,7 +1,7 @@
 {
 	"id": "verdant_glade",
 	"name": "Clareira Verdejante",
-	"description": "Uma clareira aberta no meio da floresta, com pedras, tocos, árvores e um pequeno lago central.",
+	"description": "Uma clareira aberta no meio da floresta, com pedras, tocos, árvores, mato alto para se esconder e um pequeno lago central.",
 	"size": [1120, 760],
 	"seed": 7,
 	"mirror": "x",
@@ -39,6 +39,12 @@
 		{"kind": "tree", "pos": [560, 676], "no_mirror": true},
 		{"kind": "rock", "pos": [500, 250], "radius": 11},
 		{"kind": "rock", "pos": [505, 520], "radius": 12}
+	],
+	"terrain": [
+		{"kind": "tall_grass", "rect": [360, 184, 96, 48]},
+		{"kind": "tall_grass", "rect": [360, 536, 96, 48]},
+		{"kind": "tall_grass", "circle": [560, 252, 26], "no_mirror": true},
+		{"kind": "tall_grass", "circle": [560, 508, 26], "no_mirror": true}
 	],
 	"bushes": [[110, 300], [120, 460], [350, 300], [350, 470], [1010, 300], [1000, 460], [770, 300], [770, 470], [470, 690], [650, 70]]
 }

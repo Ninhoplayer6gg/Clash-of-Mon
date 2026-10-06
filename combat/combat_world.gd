@@ -49,6 +49,8 @@ func nearest_enemy(f: Fighter, max_range: float) -> Fighter:
 	for o in fighters:
 		if o.team == f.team or not o.is_alive() or o.hidden_mode != "":
 			continue
+		if o.concealed:  # terrain (v0.2): hidden in tall grass, no auto-aim/homing
+			continue
 		var d := f.position.distance_squared_to(o.position)
 		if d < best_d:
 			best_d = d
@@ -61,6 +63,13 @@ func enemy_of(f: Fighter) -> Fighter:
 		if o.team != f.team and o.is_alive():
 			return o
 	return null
+
+
+## Terrain (v0.2): false while `target` hides in tall grass from the
+## observer's team (ArenaTerrain concealment). Vanish/burrow are separate
+## (Fighter.hidden_mode). Bots use this instead of tracking the target.
+func can_see(observer: Fighter, target: Fighter) -> bool:
+	return target != null and (target.team == observer.team or not target.concealed)
 
 
 # --------------------------------------------------------------- spawning
@@ -181,10 +190,12 @@ func _step_projectile(p: Projectile, delta: float) -> bool:
 	if not p.ignore_walls and arena.segment_blocked(p.prev_pos, p.pos, p.radius * 0.4):
 		vfx.burst(p.pos, p.color, 5, 50.0, 0.25, 2.0)
 		arena.on_projectile_impact(p.pos, p.action)
+		_burn_grass(_action_type(p.ability, p.action), p.pos, p.radius + 10.0)  # terrain (v0.2)
 		if p.action.has("explode"):
 			_explode(p)
 		return false
 	if p.remaining <= 0.0:
+		_burn_grass(_action_type(p.ability, p.action), p.pos, p.radius + 10.0)  # terrain (v0.2)
 		if p.action.has("explode") and p.action.get("explode_on_end", false):
 			_explode(p)
 		elif p.style != "wave":
@@ -250,6 +261,7 @@ func _step_zone(z: HitZone, delta: float) -> bool:
 		if c == null or c.id != z.cast_id:
 			return false
 	if z.is_live():
+		_burn_grass_zone(z)  # terrain (v0.2): fire zones/explosions burn tall grass
 		for f in fighters:
 			if f.team == z.team or not f.can_be_hit():
 				continue
@@ -359,6 +371,7 @@ func apply_hit(attacker: Fighter, target: Fighter, ability: AbilityDef, a: Dicti
 	if attacker and is_instance_valid(attacker):
 		attacker.passive.on_hit_dealt(info)
 	target.passive.on_hit_taken(info)
+	_burn_grass(info.move_type, target.position, target.radius + 8.0)  # terrain (v0.2)
 	# Feedback
 	var eff := info.effectiveness_label()
 	var col := GameData.type_color(info.move_type)
@@ -381,6 +394,39 @@ func _speed_scaling(info: DamageInfo) -> void:
 	var mine := info.attacker.move_speed * info.attacker.status.speed_mult()
 	var theirs := maxf(info.target.move_speed * info.target.status.speed_mult(), 1.0)
 	info.mult *= clampf(mine / theirs, float(sc[0]), float(sc[1]))
+
+
+# ------------------------------------------- terrain (v0.2): burning grass
+# Fire-type hits, projectiles that land, zones and explosions burn tall
+# grass (Arena.on_fire_at -> ArenaTerrain).
+
+func _action_type(ability: AbilityDef, a: Dictionary) -> String:
+	return String(a.get("type", ability.move_type if ability else "normal"))
+
+
+func _burn_grass(move_type: String, p: Vector2, r: float) -> void:
+	if move_type == "fire" and arena != null:
+		arena.on_fire_at(p, r)
+
+
+## Live fire zones: circles at their anchor, cones and beams sampled along
+## their direction.
+func _burn_grass_zone(z: HitZone) -> void:
+	if arena == null or arena.terrain == null or arena.terrain.patches.is_empty():
+		return
+	if _action_type(z.ability, z.action) != "fire":
+		return
+	var a := z.anchor()
+	match z.shape:
+		HitZone.Shape.CIRCLE:
+			arena.on_fire_at(a, z.radius)
+		HitZone.Shape.SECTOR:
+			arena.on_fire_at(a + z.dir * z.radius * 0.45, z.radius * 0.45)
+			arena.on_fire_at(a + z.dir * z.radius * 0.85, z.radius * 0.3)
+		HitZone.Shape.LINE:
+			var n := maxi(1, int(z.length / 24.0))
+			for i in n + 1:
+				arena.on_fire_at(a + z.dir * z.length * float(i) / float(n), z.width + 4.0)
 
 
 func on_dot(target: Fighter, amount: int, status_id: String) -> void:

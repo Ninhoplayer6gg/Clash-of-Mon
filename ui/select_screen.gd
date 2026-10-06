@@ -139,6 +139,12 @@ func _build() -> void:
 			arena_opt.select(i)
 	arena_opt.item_selected.connect(func(i): arena_id = GameData.arena_ids[i])
 	col.add_child(arena_opt)
+	# Arena description under the dropdown (v0.2).
+	var arena_desc := UITheme.make_label(String(GameData.get_arena(arena_id).get("description", "")), 14, UITheme.MUTED)
+	arena_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	arena_desc.custom_minimum_size = Vector2(300, 0)
+	arena_opt.item_selected.connect(func(i): arena_desc.text = String(GameData.get_arena(GameData.arena_ids[i]).get("description", "")))
+	col.add_child(arena_desc)
 	col.add_child(UITheme.make_label("Dificuldade do bot", 18, UITheme.MUTED))
 	var diff := OptionButton.new()
 	diff.add_theme_font_size_override("font_size", 20)

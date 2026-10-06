@@ -55,6 +55,8 @@ func _draw() -> void:
 	for f in world.fighters:
 		if not f.is_alive() or f.hidden_mode != "":
 			continue
+		if f.terrain_alpha < 0.3:  # terrain (v0.2): enemy concealed in tall grass
+			continue
 		_draw_bars(f)
 	for t in _texts:
 		var k: float = t[3] / t[4]
